@@ -1,0 +1,11 @@
+{
+  "name": "rwlockfile",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/dickeyxxx/rwlockfile",
+  "author": "Jeff Dickey @dickeyxxx",
+  "license": "ISC",
+  "dependencies": {
+    "graceful-fs": ">= 4.0.0"
+  }
+}
