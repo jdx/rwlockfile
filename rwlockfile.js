@@ -166,6 +166,12 @@ exports.write = function (path, options = {}) {
   .then(() => lock(path + '.writer', options.timeout))
 }
 
+/**
+ * lock for reading
+ * @param path {string} - path of lockfile to use
+ * @param options {object}
+ * @param [options.timeout=60000] {number} - Max time to wait for lockfile to be open
+ */
 exports.read = function (path, options = {}) {
   options.timeout = options.timeout || 60000
   return waitForWriter(path, options.timeout)
