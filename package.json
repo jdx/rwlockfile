@@ -1,13 +1,7 @@
 {
   "name": "rwlockfile",
   "version": "1.0.0",
-  "main": "rwlockfile.js",
-  "scripts": {
-    "test": "nyc mocha && standard"
-  },
-  "repository": "https://github.com/dickeyxxx/rwlockfile",
   "author": "Jeff Dickey @dickeyxxx",
-  "license": "ISC",
   "dependencies": {
     "graceful-fs": ">= 4.0.0",
     "ps-node": "0.1.4"
@@ -18,5 +12,11 @@
     "mocha": "3.2.0",
     "nyc": "10.1.2",
     "standard": "8.6.0"
+  },
+  "license": "ISC",
+  "main": "rwlockfile.js",
+  "repository": "https://github.com/dickeyxxx/rwlockfile",
+  "scripts": {
+    "test": "nyc mocha && standard"
   }
 }
