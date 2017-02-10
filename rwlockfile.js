@@ -6,6 +6,7 @@ let readers = {}
 function pidActive (pid) {
   const ps = require('ps-node')
   return new Promise((resolve, reject) => {
+    if (!pid) return resolve(false)
     ps.lookup({pid}, (err, result) => {
       if (err) return reject(err)
       resolve(result.length > 0)
@@ -86,12 +87,22 @@ function getReadersSync (path) {
 }
 
 function saveReaders (path, readers) {
-  return writeFile(path + '.readers', readers.join('\n'))
+  path += '.readers'
+  if (readers.length === 0) {
+    return fs.unlink(path).catch(() => {})
+  } else {
+    return writeFile(path, readers.join('\n'))
+  }
 }
 
 function saveReadersSync (path, readers) {
+  path += '.readers'
   try {
-    fs.writeFileSync(path + '.readers', readers.join('\n'))
+    if (readers.length === 0) {
+      fs.unlinkSync(path)
+    } else {
+      fs.writeFileSync(path, readers.join('\n'))
+    }
   } catch (err) {}
 }
 
@@ -115,6 +126,24 @@ function waitForReaders (path, timeout = 60000) {
   })
 }
 
+function waitForWriter (path, timeout = 60000) {
+  return Promise.resolve(readFile(path + '.writer').catch(err => {
+    if (err.code !== 'ENOENT') throw err
+  }))
+  .then(pid => {
+    if (!pid) return
+    return pidActive(parseInt(pid))
+    .then(active => {
+      if (active) {
+        if (timeout <= 0) throw new Error(`${path} is locked with an active writer`)
+        return wait()
+        .then(() => waitForWriter(path, timeout - 100))
+      }
+      return unlock(path)
+    })
+  })
+}
+
 function unreadSync (path) {
   // TODO: potential lock issue here since not using .readers.lock
   let readers = getReadersSync(path)
@@ -123,11 +152,12 @@ function unreadSync (path) {
 
 exports.write = function (path, options = {}) {
   return waitForReaders(path, options.timeout)
-  .then(() => lock(path + '.write', options.timeout))
+  .then(() => lock(path + '.writer', options.timeout))
 }
 
 exports.read = function (path, options = {}) {
-  return lock(path + '.readers.lock')
+  return waitForWriter(path, options.timeout)
+  .then(() => lock(path + '.readers.lock'))
   .then(() => getReaders(path))
   .then(readers => saveReaders(path, readers.concat([process.pid])))
   .then(() => unlock(path + '.readers.lock'))
