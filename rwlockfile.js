@@ -110,9 +110,11 @@ function saveReadersSync (path, readers) {
   } catch (err) {}
 }
 
-function waitForReaders (path, timeout) {
+function waitForReaders (path, options, timeout) {
+  if (timeout === undefined) timeout = options.timeout
   return getReaders(path)
   .then(readers => {
+    if (options.skipOwnPid) readers = readers.filter(r => r !== process.pid)
     if (readers.length === 0) return
     let reader = readers.shift()
     return pidActive(reader)
@@ -120,12 +122,12 @@ function waitForReaders (path, timeout) {
       if (active) {
         if (timeout <= 0) throw new Error(`${path} is locked with active readers`)
         return wait()
-        .then(() => waitForReaders(path, timeout - 100))
+        .then(() => waitForReaders(path, options, timeout - 100))
       }
       return lock(path + '.readers.lock')
       .then(() => saveReaders(path, readers))
       .then(() => unlock(path + '.readers.lock'))
-      .then(() => waitForReaders(path, timeout))
+      .then(() => waitForReaders(path, options, timeout))
     })
   })
 }
@@ -159,11 +161,12 @@ function unreadSync (path) {
  * @param path {string} - path of lockfile to use
  * @param options {object}
  * @param [options.timeout=60000] {number} - Max time to wait for lockfile to be open
+ * @param [options.skipOwnPid] {boolean} - Do not wait on own pid
  * @returns {Promise}
  */
 exports.write = function (path, options = {}) {
   options.timeout = options.timeout || 60000
-  return waitForReaders(path, options.timeout)
+  return waitForReaders(path, options)
   .then(() => lock(path + '.writer', options.timeout))
 }
 
