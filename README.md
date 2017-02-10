@@ -11,7 +11,7 @@ node utility for read/write lockfiles
 
 * [rwlockfile](#module_rwlockfile)
     * [.write(path, options)](#module_rwlockfile.write)
-    * [.read(path, options)](#module_rwlockfile.read)
+    * [.read(path, options)](#module_rwlockfile.read) ⇒ <code>Promise</code>
 
 <a name="module_rwlockfile.write"></a>
 
@@ -28,7 +28,7 @@ lock for writing
 
 <a name="module_rwlockfile.read"></a>
 
-### rwlockfile.read(path, options)
+### rwlockfile.read(path, options) ⇒ <code>Promise</code>
 lock for reading
 
 **Kind**: static method of <code>[rwlockfile](#module_rwlockfile)</code>  
