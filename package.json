@@ -2,6 +2,9 @@
   "name": "rwlockfile",
   "version": "1.0.0",
   "main": "rwlockfile.js",
+  "scripts": {
+    "test": "nyc mocha && standard"
+  },
   "repository": "https://github.com/dickeyxxx/rwlockfile",
   "author": "Jeff Dickey @dickeyxxx",
   "license": "ISC",
@@ -12,6 +15,8 @@
   "devDependencies": {
     "chai": "3.5.0",
     "chai-as-promised": "6.0.0",
-    "mocha": "3.2.0"
+    "mocha": "3.2.0",
+    "nyc": "10.1.2",
+    "standard": "8.6.0"
   }
 }
