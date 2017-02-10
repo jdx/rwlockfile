@@ -1,11 +1,17 @@
 {
   "name": "rwlockfile",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "rwlockfile.js",
   "repository": "https://github.com/dickeyxxx/rwlockfile",
   "author": "Jeff Dickey @dickeyxxx",
   "license": "ISC",
   "dependencies": {
-    "graceful-fs": ">= 4.0.0"
+    "graceful-fs": ">= 4.0.0",
+    "ps-node": "0.1.4"
+  },
+  "devDependencies": {
+    "chai": "3.5.0",
+    "chai-as-promised": "6.0.0",
+    "mocha": "3.2.0"
   }
 }

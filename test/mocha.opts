@@ -1,0 +1,2 @@
+--harmony-async-await
+--require test/init.js
