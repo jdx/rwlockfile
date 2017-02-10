@@ -1,3 +1,7 @@
+/**
+ * @module rwlockfile
+ */
+
 const fs = require('graceful-fs')
 
 let locks = {}
@@ -37,7 +41,7 @@ function unlockSync (path) {
   delete locks[path]
 }
 
-function lock (path, timeout = 60000) {
+function lock (path, timeout) {
   return new Promise((resolve, reject) => {
     fs.open(path, 'wx', (err, fd) => {
       if (!err) {
@@ -106,7 +110,7 @@ function saveReadersSync (path, readers) {
   } catch (err) {}
 }
 
-function waitForReaders (path, timeout = 60000) {
+function waitForReaders (path, timeout) {
   return getReaders(path)
   .then(readers => {
     if (readers.length === 0) return
@@ -126,7 +130,7 @@ function waitForReaders (path, timeout = 60000) {
   })
 }
 
-function waitForWriter (path, timeout = 60000) {
+function waitForWriter (path, timeout) {
   return Promise.resolve(readFile(path + '.writer').catch(err => {
     if (err.code !== 'ENOENT') throw err
   }))
@@ -150,12 +154,20 @@ function unreadSync (path) {
   saveReadersSync(path, readers.filter(r => r !== process.pid))
 }
 
+/**
+ * lock for writing
+ * @param path {string} - path of lockfile to use
+ * @param options {object}
+ * @param [options.timeout=60000] {number} - Max time to wait for lockfile to be open
+ */
 exports.write = function (path, options = {}) {
+  options.timeout = options.timeout || 60000
   return waitForReaders(path, options.timeout)
   .then(() => lock(path + '.writer', options.timeout))
 }
 
 exports.read = function (path, options = {}) {
+  options.timeout = options.timeout || 60000
   return waitForWriter(path, options.timeout)
   .then(() => lock(path + '.readers.lock'))
   .then(() => getReaders(path))

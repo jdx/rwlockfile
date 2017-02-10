@@ -11,6 +11,7 @@
   "devDependencies": {
     "chai": "3.5.0",
     "chai-as-promised": "6.0.0",
+    "jsdoc-to-markdown": "2.0.1",
     "mocha": "3.2.0",
     "nyc": "10.1.2",
     "standard": "8.6.0"
@@ -24,6 +25,7 @@
   "main": "rwlockfile.js",
   "repository": "https://github.com/dickeyxxx/rwlockfile",
   "scripts": {
-    "test": "nyc mocha && standard"
+    "test": "nyc mocha && standard",
+    "doc": "jsdoc2md --template README.hbs --files rwlockfile.js > README.md"
   }
 }
