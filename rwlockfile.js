@@ -159,6 +159,7 @@ function unreadSync (path) {
  * @param path {string} - path of lockfile to use
  * @param options {object}
  * @param [options.timeout=60000] {number} - Max time to wait for lockfile to be open
+ * @returns {Promise}
  */
 exports.write = function (path, options = {}) {
   options.timeout = options.timeout || 60000
@@ -171,6 +172,7 @@ exports.write = function (path, options = {}) {
  * @param path {string} - path of lockfile to use
  * @param options {object}
  * @param [options.timeout=60000] {number} - Max time to wait for lockfile to be open
+ * @returns {Promise}
  */
 exports.read = function (path, options = {}) {
   options.timeout = options.timeout || 60000
