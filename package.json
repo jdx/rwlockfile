@@ -1,7 +1,9 @@
 {
   "name": "rwlockfile",
+  "description": "lockfile utility with reader/writers",
   "version": "1.0.0",
   "author": "Jeff Dickey @dickeyxxx",
+  "bugs": "https://github.com/dickeyxxx/rwlockfile/issues",
   "dependencies": {
     "graceful-fs": ">= 4.0.0",
     "ps-node": "0.1.4"
@@ -13,6 +15,11 @@
     "nyc": "10.1.2",
     "standard": "8.6.0"
   },
+  "homepage": "https://github.com/dickeyxxx/rwlockfile",
+  "keywords": [
+    "lockfile",
+    "locking"
+  ],
   "license": "ISC",
   "main": "rwlockfile.js",
   "repository": "https://github.com/dickeyxxx/rwlockfile",
