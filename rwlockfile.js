@@ -133,20 +133,14 @@ function waitForReaders (path, options, timeout) {
 }
 
 function waitForWriter (path, timeout) {
-  return Promise.resolve(readFile(path + '.writer').catch(err => {
-    if (err.code !== 'ENOENT') throw err
-  }))
-  .then(pid => {
-    if (!pid) return
-    return pidActive(parseInt(pid))
-    .then(active => {
-      if (active) {
-        if (timeout <= 0) throw new Error(`${path} is locked with an active writer`)
-        return wait()
-        .then(() => waitForWriter(path, timeout - 100))
-      }
-      return unlock(path)
-    })
+  return hasWriter(path)
+  .then(active => {
+    if (active) {
+      if (timeout <= 0) throw new Error(`${path} is locked with an active writer`)
+      return wait()
+      .then(() => waitForWriter(path, timeout - 100))
+    }
+    return unlock(path)
   })
 }
 
@@ -186,6 +180,21 @@ exports.read = function (path, options = {}) {
   .then(() => unlock(path + '.readers.lock'))
   .then(() => { readers[path] = 1 })
 }
+
+/**
+ * check if active writer
+ * @param path {string} - path of lockfile to use
+ */
+function hasWriter (path) {
+  return Promise.resolve(readFile(path + '.writer').catch(err => {
+    if (err.code !== 'ENOENT') throw err
+  }))
+  .then(pid => {
+    if (!pid) return false
+    return pidActive(parseInt(pid))
+  })
+}
+exports.hasWriter = hasWriter
 
 process.on('exit', function () {
   Object.keys(locks).forEach(unlockSync)
