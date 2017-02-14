@@ -29,6 +29,6 @@
     "doc": "jsdoc2md --template README.hbs --files rwlockfile.js > README.md",
     "release": "np",
     "test": "nyc mocha && standard",
-    "version": "npm run doc"
+    "version": "npm run doc && git add RELEASE.md"
   }
 }
