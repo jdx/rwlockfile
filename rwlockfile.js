@@ -155,7 +155,7 @@ function unreadSync (path) {
  * @param path {string} - path of lockfile to use
  * @param options {object}
  * @param [options.timeout=60000] {number} - Max time to wait for lockfile to be open
- * @param [options.skipOwnPid] {boolean} - Do not wait on own pid
+ * @param [options.skipOwnPid] {boolean} - Do not wait on own pid (to upgrade current process)
  * @returns {Promise}
  */
 exports.write = function (path, options = {}) {
