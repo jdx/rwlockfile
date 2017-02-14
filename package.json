@@ -26,6 +26,7 @@
   "repository": "https://github.com/dickeyxxx/rwlockfile",
   "scripts": {
     "test": "nyc mocha && standard",
+    "version": "npm run doc",
     "doc": "jsdoc2md --template README.hbs --files rwlockfile.js > README.md"
   }
 }
