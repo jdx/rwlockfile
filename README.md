@@ -11,8 +11,11 @@ node utility for read/write lockfiles
 ## rwlockfile
 
 * [rwlockfile](#module_rwlockfile)
-    * [.write(path, options)](#module_rwlockfile.write) ⇒ <code>Promise</code>
-    * [.read(path, options)](#module_rwlockfile.read) ⇒ <code>Promise</code>
+    * _static_
+        * [.write(path, options)](#module_rwlockfile.write) ⇒ <code>Promise</code>
+        * [.read(path, options)](#module_rwlockfile.read) ⇒ <code>Promise</code>
+    * _inner_
+        * [~hasWriter(path)](#module_rwlockfile..hasWriter)
 
 <a name="module_rwlockfile.write"></a>
 
@@ -26,6 +29,7 @@ lock for writing
 | path | <code>string</code> |  | path of lockfile to use |
 | options | <code>object</code> |  |  |
 | [options.timeout] | <code>number</code> | <code>60000</code> | Max time to wait for lockfile to be open |
+| [options.skipOwnPid] | <code>boolean</code> |  | Do not wait on own pid (to upgrade current process) |
 
 <a name="module_rwlockfile.read"></a>
 
@@ -39,4 +43,15 @@ lock for reading
 | path | <code>string</code> |  | path of lockfile to use |
 | options | <code>object</code> |  |  |
 | [options.timeout] | <code>number</code> | <code>60000</code> | Max time to wait for lockfile to be open |
+
+<a name="module_rwlockfile..hasWriter"></a>
+
+### rwlockfile~hasWriter(path)
+check if active writer
+
+**Kind**: inner method of <code>[rwlockfile](#module_rwlockfile)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| path | <code>string</code> | path of lockfile to use |
 
