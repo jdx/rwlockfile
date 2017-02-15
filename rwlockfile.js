@@ -196,6 +196,8 @@ function hasWriter (path) {
 }
 exports.hasWriter = hasWriter
 
+exports.unreadSync = unreadSync
+
 process.on('exit', function () {
   Object.keys(locks).forEach(unlockSync)
   Object.keys(readers).forEach(unreadSync)
