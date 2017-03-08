@@ -162,6 +162,7 @@ exports.write = function (path, options = {}) {
   options.timeout = options.timeout || 60000
   return waitForReaders(path, options)
   .then(() => lock(path + '.writer', options.timeout))
+  .then(() => () => unlock(path + '.writer'))
 }
 
 /**
