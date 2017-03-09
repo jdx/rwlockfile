@@ -24,12 +24,14 @@ describe('rwlockfile', function () {
   })
 
   it('succeeds when write locking with stale writer', async function () {
-    fs.writeFileSync('tmp/d.writer', '290830098')
+    fs.mkdirSync('tmp/d.writer')
+    fs.writeFileSync('tmp/d.writer/pid', '290830098')
     await lock.write('tmp/d')
   })
 
   it('succeeds when read locking with stale writer', async function () {
-    fs.writeFileSync('tmp/e.writer', '290830098')
+    if (!fs.existsSync('tmp/e.writer')) fs.mkdirSync('tmp/e.writer')
+    fs.writeFileSync('tmp/e.writer/pid', '290830098')
     await lock.read('tmp/e')
   })
 })

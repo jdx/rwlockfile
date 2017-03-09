@@ -6,7 +6,8 @@
   "bugs": "https://github.com/dickeyxxx/rwlockfile/issues",
   "dependencies": {
     "graceful-fs": "^4.0.0",
-    "ps-node": "^0.1.4"
+    "ps-node": "^0.1.4",
+    "rimraf": "^2.6.1"
   },
   "devDependencies": {
     "chai": "3.5.0",
