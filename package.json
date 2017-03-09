@@ -5,17 +5,17 @@
   "author": "Jeff Dickey @dickeyxxx",
   "bugs": "https://github.com/dickeyxxx/rwlockfile/issues",
   "dependencies": {
-    "graceful-fs": ">= 4.0.0",
-    "ps-node": "0.1.4"
+    "graceful-fs": "^4.0.0",
+    "ps-node": "^0.1.4"
   },
   "devDependencies": {
     "chai": "3.5.0",
     "chai-as-promised": "6.0.0",
-    "jsdoc-to-markdown": "2.0.1",
+    "jsdoc-to-markdown": "3.0.0",
     "mocha": "3.2.0",
     "np": "2.12.0",
     "nyc": "10.1.2",
-    "standard": "8.6.0"
+    "standard": "9.0.1"
   },
   "homepage": "https://github.com/dickeyxxx/rwlockfile",
   "keywords": [
