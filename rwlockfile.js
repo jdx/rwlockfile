@@ -3,6 +3,8 @@
  */
 
 const fs = require('graceful-fs')
+const path = require('path')
+const rimraf = require('rimraf')
 
 let locks = {}
 let readers = {}
@@ -27,7 +29,7 @@ function lockActive (path) {
 }
 
 function unlock (path) {
-  return new Promise(resolve => fs.unlink(path, resolve))
+  return new Promise(resolve => rimraf(path, resolve))
 }
 
 function wait (ms = 100) {
@@ -36,24 +38,25 @@ function wait (ms = 100) {
 
 function unlockSync (path) {
   try {
-    fs.unlinkSync(path)
+    rimraf.sync(path)
   } catch (err) { }
   delete locks[path]
 }
 
-function lock (path, timeout) {
+function lock (p, timeout) {
+  let pidPath = path.join(p, 'pid')
   return new Promise((resolve, reject) => {
-    fs.open(path, 'wx', (err, fd) => {
+    fs.mkdir(p, (err) => {
       if (!err) {
-        locks[path] = fd
-        fs.write(fd, process.pid.toString(), resolve)
+        locks[p] = 1
+        fs.writeFile(pidPath, process.pid.toString(), resolve)
         return
       }
       if (err.code !== 'EEXIST') return reject(err)
-      lockActive(path).then(active => {
-        if (!active) return unlock(path).then(resolve).catch(reject)
-        if (timeout <= 0) throw new Error(`${path} is locked`)
-        wait().then(() => lock(path, timeout - 100).then(resolve).catch(reject))
+      lockActive(pidPath).then(active => {
+        if (!active) return unlock(p).then(resolve).catch(reject)
+        if (timeout <= 0) throw new Error(`${p} is locked`)
+        wait().then(() => lock(p, timeout - 100).then(resolve).catch(reject))
       }).catch(reject)
     })
   })
@@ -78,7 +81,7 @@ function writeFile (path, content) {
 }
 
 function getReaders (path) {
-  return readFile(path + '.readers')
+  return readFile(path + '.readers', 'utf8')
   .then(f => f.split('\n').map(r => parseInt(r)))
   .catch(() => [])
 }
@@ -186,8 +189,8 @@ exports.read = function (path, options = {}) {
  * check if active writer
  * @param path {string} - path of lockfile to use
  */
-function hasWriter (path) {
-  return Promise.resolve(readFile(path + '.writer').catch(err => {
+function hasWriter (p) {
+  return Promise.resolve(readFile(path.join(p + '.writer', 'pid')).catch(err => {
     if (err.code !== 'ENOENT') throw err
   }))
   .then(pid => {
