@@ -20,12 +20,14 @@ function pidActive (pid) {
   })
 }
 
-function lockActive (path) {
-  return readFile(path)
-  .then(file => {
+async function lockActive (path) {
+  try {
+    let file = await readFile(path)
     let pid = parseInt(file.trim())
     return pidActive(pid)
-  })
+  } catch (err) {
+    if (err.code !== 'ENOENT') throw err
+  }
 }
 
 function unlock (path) {
