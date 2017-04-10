@@ -31,7 +31,7 @@
     "doc": "jsdoc2md --template README.hbs --files rwlockfile.js > README.md",
     "release": "np",
     "test": "jest && standard",
-    "version": "npm run doc && git add README.md"
+    "_version": "npm run doc && git add README.md"
   },
   "standard": {
     "env": "jest"
