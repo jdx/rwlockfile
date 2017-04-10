@@ -30,7 +30,7 @@
   "scripts": {
     "doc": "jsdoc2md --template README.hbs --files rwlockfile.js > README.md",
     "release": "np",
-    "test": "nyc mocha && standard",
+    "test": "jest && standard",
     "version": "npm run doc && git add README.md"
   },
   "standard": {
