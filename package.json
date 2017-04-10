@@ -6,18 +6,19 @@
   "bugs": "https://github.com/dickeyxxx/rwlockfile/issues",
   "dependencies": {
     "graceful-fs": "^4.0.0",
-    "ps-node": "^0.1.4",
+    "ps-node": "^0.1.5",
     "rimraf": "^2.6.1"
   },
   "devDependencies": {
-    "chai": "3.5.0",
-    "chai-as-promised": "6.0.0",
+    "jest": "19.0.2",
     "jsdoc-to-markdown": "3.0.0",
-    "mocha": "3.2.0",
-    "np": "2.12.0",
-    "nyc": "10.1.2",
-    "standard": "9.0.1"
+    "np": "2.13.1",
+    "nyc": "10.2.0",
+    "standard": "10.0.1"
   },
+  "files": [
+    "rwlockfile.js"
+  ],
   "homepage": "https://github.com/dickeyxxx/rwlockfile",
   "keywords": [
     "lockfile",
@@ -31,5 +32,8 @@
     "release": "np",
     "test": "nyc mocha && standard",
     "version": "npm run doc && git add README.md"
+  },
+  "standard": {
+    "env": "jest"
   }
 }
