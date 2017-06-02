@@ -5,16 +5,14 @@
   "author": "Jeff Dickey @dickeyxxx",
   "bugs": "https://github.com/dickeyxxx/rwlockfile/issues",
   "dependencies": {
-    "graceful-fs": "^4.0.0",
-    "ps-node": "^0.1.5",
-    "rimraf": "^2.6.1"
+    "graceful-fs": "4.x",
+    "ps-node": "0.x",
+    "rimraf": "2.x"
   },
   "devDependencies": {
-    "jest": "19.0.2",
+    "jest": "20.0.4",
     "jsdoc-to-markdown": "3.0.0",
-    "np": "2.13.1",
-    "nyc": "10.2.0",
-    "standard": "10.0.1"
+    "standard": "10.0.2"
   },
   "files": [
     "rwlockfile.js"
