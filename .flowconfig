@@ -1,0 +1,11 @@
+[ignore]
+<PROJECT_ROOT>/tmp/.*
+<PROJECT_ROOT>/lib/.*
+
+[include]
+
+[libs]
+
+[options]
+unsafe.enable_getters_and_setters=true
+suppress_comment= \\(.\\|\n\\)*flow\\$ignore
