@@ -19,7 +19,7 @@ test('fails with 1 reader trying to write', async () => {
   try {
     await lock.write('tmp/b', {timeout: 200})
   } catch (err) {
-    expect(err.message).toEqual('tmp/b is locked with active readers')
+    expect(err.message).toContain('tmp/b is locked with a reader active')
   }
 })
 
