@@ -8,7 +8,8 @@ const debug = require('debug')('rwlockfile')
 let locks = {}
 let readers = {}
 
-function pidActive (pid): Promise<boolean> {
+async function pidActive (pid): Promise<boolean> {
+  if (isNaN(pid)) return false
   const ps = require('ps-node')
   return new Promise((resolve, reject) => {
     if (!pid) return resolve(false)
@@ -86,7 +87,7 @@ function writeFile (path: string, content: string) {
   })
 }
 
-async function getReaders (path): Promise<number[]> {
+async function getReadersFile (path): Promise<number[]> {
   try {
     let f = await readFile(path + '.readers')
     return f.split('\n').map(r => parseInt(r))
@@ -95,7 +96,7 @@ async function getReaders (path): Promise<number[]> {
   }
 }
 
-function getReadersSync (path): number[] {
+function getReadersFileSync (path): number[] {
   try {
     let f = fs.readFileSync(path + '.readers', 'utf8')
     return f.split('\n').map(r => parseInt(r))
@@ -122,34 +123,35 @@ function saveReadersSync (path, readers) {
   } catch (err) {}
 }
 
-function waitForReaders (path: string, timeout: number, skipOwnPid: boolean) {
-  return getReaders(path)
-  .then(readers => {
-    if (skipOwnPid) readers = readers.filter(r => r !== process.pid)
-    if (readers.length === 0) return
-    let reader = readers.shift()
-    return pidActive(reader)
-    .then(active => {
-      if (active) {
-        debug(`waiting for readers: path=${path} timeout=${timeout}`)
-        if (timeout <= 0) throw new Error(`${path} is locked with active readers`)
-        return wait()
-        .then(() => waitForReaders(path, timeout - 100, skipOwnPid))
-      }
-      return lock(path + '.readers.lock', timeout)
-      .then(() => saveReaders(path, readers))
-      .then(() => unlock(path + '.readers.lock'))
-      .then(() => waitForReaders(path, timeout, skipOwnPid))
-    })
-  })
+async function getReaders (path: string, timeout: number, skipOwnPid: boolean = false): Promise<number[]> {
+  await lock(path + '.readers.lock', timeout)
+  let readers: number[] = await getReadersFile(path)
+  let promises = readers.map(r => pidActive(r).then(active => active ? r : null))
+  let activeReaders = (await Promise.all(promises): any)
+  activeReaders = activeReaders.filter(r => r !== null)
+  if (activeReaders.length !== readers.length) {
+    await saveReaders(path, activeReaders)
+  }
+  await unlock(path + '.readers.lock')
+  return skipOwnPid ? activeReaders.filter(r => r !== process.pid) : activeReaders
+}
+
+async function waitForReaders (path: string, timeout: number, skipOwnPid: boolean) {
+  let readers = await getReaders(path, timeout, skipOwnPid)
+  if (readers.length !== 0) {
+    if (timeout <= 0) throw new Error(`${path} is locked with ${readers.length === 1 ? 'a reader' : 'readers'} active: ${readers.join(' ')}`)
+    debug(`waiting for readers: ${readers.join(' ')} timeout=${timeout}`)
+    await wait(100)
+    await waitForReaders(path, timeout - 100, skipOwnPid)
+  }
 }
 
 function waitForWriter (path, timeout) {
   return hasWriter(path)
   .then(active => {
     if (active) {
-      debug(`waiting for writer: path=${path} timeout=${timeout}`)
       if (timeout <= 0) throw new Error(`${path} is locked with an active writer`)
+      debug(`waiting for writer: path=${path} timeout=${timeout}`)
       return wait()
       .then(() => waitForWriter(path, timeout - 100))
     }
@@ -159,7 +161,7 @@ function waitForWriter (path, timeout) {
 
 function unreadSync (path: string) {
   // TODO: potential lock issue here since not using .readers.lock
-  let readers = getReadersSync(path)
+  let readers = getReadersFileSync(path)
   saveReadersSync(path, readers.filter(r => r !== process.pid))
 }
 
@@ -177,11 +179,11 @@ type WriteLockOptions = {
  * @returns {Promise}
  */
 exports.write = async function (path: string, options: $Shape<WriteLockOptions> = {}) {
-  options.skipOwnPid = !!options.skipOwnPid
-  options.timeout = options.timeout || 60000
-  debug(`write(${path}, timeout=${options.timeout}, skipOwnPid=${options.skipOwnPid.toString()})`)
-  await waitForReaders(path, options.timeout, options.skipOwnPid)
-  await lock(path + '.writer', options.timeout)
+  let skipOwnPid = !!options.skipOwnPid
+  let timeout = options.timeout || 60000
+  debug(`write(${path}, timeout=${timeout}, skipOwnPid=${skipOwnPid.toString()})`)
+  await waitForReaders(path, timeout, skipOwnPid)
+  await lock(path + '.writer', timeout)
   return () => unlock(path + '.writer')
 }
 
@@ -197,11 +199,11 @@ type ReadLockOptions = {
  * @returns {Promise}
  */
 exports.read = async function (path: string, options: $Shape<ReadLockOptions> = {}) {
-  options.timeout = options.timeout || 60000
-  debug(`read(${path}, timeout=${options.timeout})`)
-  await waitForWriter(path, options.timeout)
-  await lock(path + '.readers.lock', options.timeout)
-  let readersFile = await getReaders(path)
+  let timeout = options.timeout || 60000
+  debug(`read(${path}, timeout=${timeout})`)
+  await waitForWriter(path, timeout)
+  await lock(path + '.readers.lock', timeout)
+  let readersFile = await getReadersFile(path)
   await saveReaders(path, readersFile.concat([process.pid]))
   await unlock(path + '.readers.lock')
   readers[path] = 1
@@ -224,6 +226,15 @@ async function hasWriter (p: string): Promise<boolean> {
   return active
 }
 exports.hasWriter = hasWriter
+
+async function hasReaders (p: string, options: $Shape<WriteLockOptions> = {}): Promise<boolean> {
+  let timeout = options.timeout || 60000
+  let skipOwnPid = !!options.skipOwnPid
+  let readers = await getReaders(p, timeout, skipOwnPid)
+  debug(`hasReaders(${p}): ${readers.length}`)
+  return readers.length === 0
+}
+exports.hasReaders = hasReaders
 
 exports.unreadSync = unreadSync
 
