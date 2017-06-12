@@ -10,12 +10,17 @@
     "rimraf": "2.x"
   },
   "devDependencies": {
+    "babel-cli": "^6.24.1",
+    "babel-eslint": "^7.2.3",
+    "babel-plugin-transform-flow-strip-types": "^6.22.0",
+    "flow-bin": "^0.47.0",
     "jest": "20.0.4",
     "jsdoc-to-markdown": "3.0.0",
+    "rwlockfile": "^1.3.9",
     "standard": "10.0.2"
   },
   "files": [
-    "rwlockfile.js"
+    "lib"
   ],
   "homepage": "https://github.com/dickeyxxx/rwlockfile",
   "keywords": [
@@ -23,15 +28,19 @@
     "locking"
   ],
   "license": "ISC",
-  "main": "rwlockfile.js",
+  "main": "lib/rwlockfile.js",
   "repository": "https://github.com/dickeyxxx/rwlockfile",
   "scripts": {
-    "doc": "jsdoc2md --template README.hbs --files rwlockfile.js > README.md",
-    "release": "np",
-    "test": "jest && standard",
-    "_version": "npm run doc && git add README.md"
+    "build": "babel src -d lib --ignore '*.test.js'",
+    "clean": "rimraf lib",
+    "prepare": "npm run clean && npm run build",
+    "test": "jest && flow && standard"
   },
   "standard": {
-    "env": "jest"
+    "parser": "babel-eslint",
+    "env": "jest",
+    "globals": [
+      "$Shape"
+    ]
   }
 }
