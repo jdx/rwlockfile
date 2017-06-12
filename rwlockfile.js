@@ -32,6 +32,7 @@ async function lockActive (path) {
 
 function unlock (path) {
   return new Promise(resolve => rimraf(path, resolve))
+  .then(() => { delete locks[path] })
 }
 
 function wait (ms = 100) {
