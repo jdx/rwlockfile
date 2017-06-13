@@ -3,6 +3,7 @@
 const lock = require('./rwlockfile')
 const fs = require('graceful-fs')
 const tmp = require('tmp')
+const path = require('path')
 
 let t
 beforeEach(() => {
@@ -89,4 +90,10 @@ test('cleanup', async () => {
   expect(await lock.hasReaders(t)).toEqual(true)
   lock.cleanup()
   expect(await lock.hasReaders(t)).toEqual(false)
+})
+
+test('mkdirp', async () => {
+  t = path.join(t, 'foo')
+  await lock.read(t)
+  expect(await lock.hasReaders(t)).toEqual(true)
 })
