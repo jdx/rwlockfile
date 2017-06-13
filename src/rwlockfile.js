@@ -4,6 +4,7 @@ const fs = require('graceful-fs')
 const path = require('path')
 const rimraf = require('rimraf')
 const debug = require('debug')('rwlockfile')
+const mkdir = require('mkdirp')
 
 let locks = {}
 let readers = {}
@@ -51,6 +52,7 @@ function unlockSync (path) {
 
 function lock (p: string, timeout: number) {
   let pidPath = path.join(p, 'pid')
+  if (!fs.existsSync(path.dirname(p))) mkdir.sync(path.dirname(p))
   return new Promise((resolve, reject) => {
     fs.mkdir(p, (err) => {
       if (!err) {
