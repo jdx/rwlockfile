@@ -5,6 +5,7 @@
   "author": "Jeff Dickey @dickeyxxx",
   "bugs": "https://github.com/dickeyxxx/rwlockfile/issues",
   "dependencies": {
+    "debug": "2.x",
     "graceful-fs": "4.x",
     "ps-node": "0.x",
     "rimraf": "2.x"
@@ -35,7 +36,8 @@
     "build": "babel src -d lib --ignore '*.test.js'",
     "clean": "rimraf lib",
     "prepare": "npm run clean && npm run build",
-    "test": "jest && flow && standard"
+    "test": "jest && flow && standard",
+    "watch": "nodemon -e js -i lib --exec \"npm run prepare\""
   },
   "standard": {
     "parser": "babel-eslint",
