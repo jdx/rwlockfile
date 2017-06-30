@@ -163,7 +163,7 @@ function waitForWriter (path, timeout) {
   })
 }
 
-async function unread (path: string, timeout: number) {
+async function unread (path: string, timeout: number = 60000) {
   await lock(path + '.readers.lock', timeout)
   let readers = await getReadersFile(path)
   if (readers.find(r => r === process.pid)) {
