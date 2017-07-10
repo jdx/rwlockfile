@@ -10,15 +10,27 @@ let locks = {}
 let readers = {}
 
 async function pidActive (pid): Promise<boolean> {
-  if (isNaN(pid)) return false
+  if (!pid || isNaN(pid)) return false
+  return process.platform === 'win32' ? pidActiveWindows(pid) : pidActiveUnix(pid)
+}
+
+function pidActiveWindows (pid): Promise<boolean> {
   const ps = require('ps-node')
   return new Promise((resolve, reject) => {
-    if (!pid) return resolve(false)
     ps.lookup({pid}, (err, result) => {
       if (err) return reject(err)
       resolve(result.length > 0)
     })
   })
+}
+
+function pidActiveUnix (pid): boolean {
+  try {
+    // flow$ignore
+    return process.kill(pid, 0)
+  } catch (e) {
+    return e.code === 'EPERM'
+  }
 }
 
 async function lockActive (path): Promise<boolean> {
@@ -39,7 +51,7 @@ function unlock (path) {
   .then(() => { delete locks[path] })
 }
 
-function wait (ms = 100) {
+function wait (ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
@@ -65,7 +77,7 @@ function lock (p: string, timeout: number) {
         if (!active) return unlock(p).then(resolve).catch(reject)
         if (timeout <= 0) throw new Error(`${p} is locked`)
         debug(`locking ${p} ${timeout / 100}s...`)
-        wait().then(() => lock(p, timeout - 100).then(resolve).catch(reject))
+        wait(1000).then(() => lock(p, timeout - 1000).then(resolve).catch(reject))
       }).catch(reject)
     })
   })
@@ -145,8 +157,8 @@ async function waitForReaders (path: string, timeout: number, skipOwnPid: boolea
   if (readers.length !== 0) {
     if (timeout <= 0) throw new Error(`${path} is locked with ${readers.length === 1 ? 'a reader' : 'readers'} active: ${readers.join(' ')}`)
     debug(`waiting for readers: ${readers.join(' ')} timeout=${timeout}`)
-    await wait(100)
-    await waitForReaders(path, timeout - 100, skipOwnPid)
+    await wait(1000)
+    await waitForReaders(path, timeout - 1000, skipOwnPid)
   }
 }
 
@@ -156,8 +168,8 @@ function waitForWriter (path, timeout) {
     if (active) {
       if (timeout <= 0) throw new Error(`${path} is locked with an active writer`)
       debug(`waiting for writer: path=${path} timeout=${timeout}`)
-      return wait()
-      .then(() => waitForWriter(path, timeout - 100))
+      return wait(1000)
+      .then(() => waitForWriter(path, timeout - 1000))
     }
     return unlock(path)
   })
