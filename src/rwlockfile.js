@@ -9,12 +9,12 @@ const mkdir = require('mkdirp')
 let locks = {}
 let readers = {}
 
-async function pidActive (pid): Promise<boolean> {
+async function pidActive (pid: number): Promise<boolean> {
   if (!pid || isNaN(pid)) return false
   return process.platform === 'win32' ? pidActiveWindows(pid) : pidActiveUnix(pid)
 }
 
-function pidActiveWindows (pid): Promise<boolean> {
+function pidActiveWindows (pid: number): Promise<boolean> {
   const ps = require('ps-node')
   return new Promise((resolve, reject) => {
     ps.lookup({pid}, (err, result) => {
@@ -24,7 +24,7 @@ function pidActiveWindows (pid): Promise<boolean> {
   })
 }
 
-function pidActiveUnix (pid): boolean {
+function pidActiveUnix (pid: number): boolean {
   try {
     // flow$ignore
     return process.kill(pid, 0)
@@ -33,7 +33,7 @@ function pidActiveUnix (pid): boolean {
   }
 }
 
-async function lockActive (path): Promise<boolean> {
+async function lockActive (path: string): Promise<boolean> {
   try {
     let file = await readFile(path)
     let pid = parseInt(file.trim())
@@ -46,7 +46,7 @@ async function lockActive (path): Promise<boolean> {
   }
 }
 
-function unlock (path) {
+function unlock (path: string) {
   return new Promise(resolve => rimraf(path, resolve))
   .then(() => { delete locks[path] })
 }
@@ -55,7 +55,7 @@ function wait (ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
-function unlockSync (path) {
+function unlockSync (path: string) {
   try {
     rimraf.sync(path)
   } catch (err) { debug(err) }
