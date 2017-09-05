@@ -241,7 +241,6 @@ exports.read = async function (path: string, options: $Shape<ReadLockOptions> = 
  * @param path {string} - path of lockfile to use
  */
 async function hasWriter (p: string): Promise<boolean> {
-  debug(`hasWriter ${p}`)
   let pid
   try {
     pid = await readFile(path.join(p + '.writer', 'pid'))
