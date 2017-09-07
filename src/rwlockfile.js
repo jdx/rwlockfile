@@ -1,8 +1,7 @@
 // @flow
 
-const fs = require('graceful-fs')
+const fs = require('fs-extra')
 const path = require('path')
-const rimraf = require('rimraf')
 const debug = require('debug')('rwlockfile')
 const mkdir = require('mkdirp')
 
@@ -47,7 +46,7 @@ async function lockActive (path: string): Promise<boolean> {
 }
 
 function unlock (path: string) {
-  return new Promise(resolve => rimraf(path, resolve))
+  return new Promise(resolve => fs.remove(path, resolve))
   .then(() => { delete locks[path] })
 }
 
@@ -57,7 +56,7 @@ function wait (ms: number) {
 
 function unlockSync (path: string) {
   try {
-    rimraf.sync(path)
+    fs.removeSync(path)
   } catch (err) { debug(err) }
   delete locks[path]
 }
