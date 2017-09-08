@@ -248,7 +248,6 @@ async function hasWriter (p: string): Promise<boolean> {
   }
   if (!pid) return false
   let active = await pidActive(parseInt(pid))
-  debug(`hasWriter(${p}): ${active ? 'yes' : 'no'}`)
   return active
 }
 exports.hasWriter = hasWriter
@@ -257,7 +256,6 @@ async function hasReaders (p: string, options: $Shape<WriteLockOptions> = {}): P
   let timeout = options.timeout || 60000
   let skipOwnPid = !!options.skipOwnPid
   let readers = await getActiveReaders(p, timeout, skipOwnPid)
-  debug(`hasReaders ${p}: ${readers.length}`)
   return readers.length !== 0
 }
 exports.hasReaders = hasReaders
