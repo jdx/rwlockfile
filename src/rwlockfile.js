@@ -75,7 +75,7 @@ function lock (p: string, timeout: number) {
       lockActive(pidPath).then(active => {
         if (!active) return unlock(p).then(resolve).catch(reject)
         if (timeout <= 0) throw new Error(`${p} is locked`)
-        debug(`locking ${p} ${timeout / 100}s...`)
+        debug(`locking ${p} ${timeout / 1000}s...`)
         wait(1000).then(() => lock(p, timeout - 1000).then(resolve).catch(reject))
       }).catch(reject)
     })
