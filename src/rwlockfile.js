@@ -46,7 +46,10 @@ async function lockActive (path: string): Promise<boolean> {
 }
 
 function unlock (path: string) {
-  return new Promise(resolve => fs.remove(path, resolve))
+  return new Promise(resolve => {
+    debug(`unlock ${path}`)
+    fs.remove(path, resolve)
+  })
   .then(() => { delete locks[path] })
 }
 
@@ -55,6 +58,7 @@ function wait (ms: number) {
 }
 
 function unlockSync (path: string) {
+  debug(`unlock ${path}`)
   try {
     fs.removeSync(path)
   } catch (err) { debug(err) }
