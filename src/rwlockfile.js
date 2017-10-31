@@ -14,11 +14,14 @@ async function pidActive (pid: number): Promise<boolean> {
 }
 
 function pidActiveWindows (pid: number): Promise<boolean> {
-  const ps = require('ps-node')
   return new Promise((resolve, reject) => {
-    ps.lookup({pid}, (err, result) => {
-      if (err) return reject(err)
-      resolve(result.length > 0)
+    const {spawn} = require('child_process')
+    const p = spawn('tasklist', ['/fi', `PID eq ${pid}`])
+    p.on('close', code => {
+      if (code !== 0) reject(new Error(`tasklist exited with code ${code}`))
+    })
+    p.stdout.on('data', stdout => {
+      resolve(!stdout.includes('No tasks are running'))
     })
   })
 }
