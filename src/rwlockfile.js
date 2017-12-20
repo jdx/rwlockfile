@@ -1,9 +1,12 @@
-// @flow
-
 const fs = require('fs-extra')
 const path = require('path')
-const debug = require('debug')('rwlockfile')
-const mkdir = require('mkdirp')
+
+let debug
+try {
+  debug = require('debug')('rwlockfile')
+} catch (err) {
+  debug = () => {}
+}
 
 let locks = {}
 let readers = {}
@@ -66,7 +69,7 @@ function unlockSync (path: string) {
 
 function lock (p: string, timeout: number) {
   let pidPath = path.join(p, 'pid')
-  if (!fs.existsSync(path.dirname(p))) mkdir.sync(path.dirname(p))
+  if (!fs.existsSync(path.dirname(p))) fs.mkdirpSync(path.dirname(p))
   return new Promise((resolve, reject) => {
     fs.mkdir(p, (err) => {
       if (!err) {
