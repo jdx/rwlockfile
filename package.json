@@ -1,7 +1,7 @@
 {
   "name": "rwlockfile",
   "description": "lockfile utility with reader/writers",
-  "version": "1.4.11",
+  "version": "1.4.12",
   "author": "Jeff Dickey @dickeyxxx",
   "bugs": "https://github.com/dickeyxxx/rwlockfile/issues",
   "dependencies": {
