@@ -196,7 +196,7 @@ function unreadSync (path: string) {
   saveReadersSync(path, readers.filter(r => r !== process.pid))
 }
 
-type WriteLockOptions = {
+type WriteLockOptions = { // eslint-disable-line
   timeout: number,
   skipOwnPid: boolean
 }
@@ -218,7 +218,7 @@ exports.write = async function (path: string, options: $Shape<WriteLockOptions> 
   return () => unlock(path + '.writer')
 }
 
-type ReadLockOptions = {
+type ReadLockOptions = { // eslint-disable-line
   timeout: number
 }
 
