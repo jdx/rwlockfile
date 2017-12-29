@@ -2,23 +2,31 @@
   "name": "rwlockfile",
   "description": "lockfile utility with reader/writers",
   "version": "1.4.12",
-  "author": "Jeff Dickey @dickeyxxx",
-  "bugs": "https://github.com/dickeyxxx/rwlockfile/issues",
+  "author": "Jeff Dickey @jdxcode",
+  "bugs": "https://github.com/jdxcode/rwlockfile/issues",
   "dependencies": {
-    "fs-extra": "^5.0.0"
+    "fs-extra": "^5.0.0",
+    "graceful-fs": "^4.1.11",
+    "retry": "^0.10.1",
+    "rimraf": "^2.6.2",
+    "tslib": "^1.8.1",
+    "uuid": "^3.1.0"
   },
   "devDependencies": {
-    "babel-cli": "^6.24.1",
-    "babel-eslint": "^8.1.2",
-    "babel-plugin-transform-async-to-generator": "^6.24.1",
-    "babel-plugin-transform-flow-strip-types": "^6.22.0",
-    "flow-bin": "^0.61.0",
-    "flow-copy-source": "^1.2.0",
+    "@types/debug": "^0.0.30",
+    "@types/fs-extra": "^5.0.0",
+    "@types/graceful-fs": "^4.1.2",
+    "@types/jest": "^21.1.10",
+    "@types/node": "^8.5.2",
+    "@types/retry": "^0.10.2",
+    "@types/tmp": "^0.0.33",
+    "@types/uuid": "^3.4.3",
+    "debug": "^3.1.0",
+    "del-cli": "^1.1.0",
     "jest": "^22.0.4",
-    "jsdoc-to-markdown": "3.0.3",
-    "rimraf": "^2.6.2",
-    "standard": "^10.0.3",
-    "tmp": "^0.0.33"
+    "tmp": "^0.0.33",
+    "ts-jest": "^22.0.0",
+    "typescript": "^2.6.2"
   },
   "engines": {
     "node": ">=6.0.0"
@@ -26,31 +34,16 @@
   "files": [
     "lib"
   ],
-  "homepage": "https://github.com/dickeyxxx/rwlockfile",
+  "homepage": "https://github.com/jdxcode/rwlockfile",
   "keywords": [
     "lockfile",
     "locking"
   ],
   "license": "ISC",
   "main": "lib/rwlockfile.js",
-  "repository": "https://github.com/dickeyxxx/rwlockfile",
+  "repository": "jdxcode/rwlockfile",
   "scripts": {
-    "build": "babel src -d lib --ignore '*.test.js'",
-    "clean": "rimraf lib",
-    "copy-flow": "flow-copy-source -v -i '*.test.js' src lib",
-    "prepare": "npm run clean && npm run build && npm run copy-flow",
-    "test": "jest && flow && standard",
-    "watch": "nodemon -e js -i lib --exec \"npm run prepare\""
-  },
-  "standard": {
-    "parser": "babel-eslint",
-    "env": "jest",
-    "globals": [
-      "$Shape"
-    ],
-    "ignore": [
-      "flow-typed",
-      "lib"
-    ]
+    "prepare": "del-cli lib && tsc && del-cli lib/**/*.test.d.ts lib/**/*.test.js ",
+    "test": "jest"
   }
 }
