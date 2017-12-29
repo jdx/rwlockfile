@@ -16,7 +16,7 @@
     "@types/debug": "^0.0.30",
     "@types/fs-extra": "^5.0.0",
     "@types/graceful-fs": "^4.1.2",
-    "@types/jest": "^21.1.10",
+    "@types/jest": "^22.0.0",
     "@types/node": "^8.5.2",
     "@types/retry": "^0.10.2",
     "@types/tmp": "^0.0.33",
