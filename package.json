@@ -46,5 +46,6 @@
   "scripts": {
     "prepare": "del-cli lib && tsc && del-cli lib/**/*.test.d.ts lib/**/*.test.js ",
     "test": "jest"
-  }
+  },
+  "types": "lib/index.d.ts"
 }
