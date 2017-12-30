@@ -15,7 +15,7 @@ const flush = () => new Promise(resolve => setImmediate(resolve))
 beforeEach(async () => {
   debug('lock:test')('beforeEach')
   f = path.join(dir, count.toString())
-  await fs.remove(path.join(__dirname, '../tmp'))
+  await fs.remove(f)
   count++
 })
 
