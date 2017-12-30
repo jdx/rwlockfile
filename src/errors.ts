@@ -12,16 +12,19 @@ export class LockfileError extends Error {
 }
 
 export class RWLockfileError extends LockfileError {
+  status: Status
+
   constructor(status: Status, file: string) {
     switch (status.status) {
       case 'write_lock':
         super({ file, msg: `write lock exists: ${status.job.reason || ''}` })
-        return
+        break
       case 'read_lock':
         super({ file, msg: `read lock exists: ${status.jobs[0].reason || ''}` })
-        return
+        break
       default:
         throw new Error(`Unexpected status: ${status.status}`)
     }
+    this.status = status
   }
 }

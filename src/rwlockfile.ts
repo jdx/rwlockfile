@@ -10,16 +10,19 @@ const version = require('../package.json').version
 export type ReadStatus =
   | {
       status: 'open'
+      file: string
     }
   | {
       status: 'write_lock'
       job: Job
+      file: string
     }
 
 export type WriteStatus =
   | ReadStatus
   | {
       status: 'read_lock'
+      file: string
       jobs: Job[]
     }
 
@@ -27,7 +30,7 @@ export type Status = WriteStatus
 
 export interface RWLockOptions {
   reason?: string
-  ifLocked?: ({ reason }: { reason?: string }) => Promise<void> | void
+  ifLocked?: IfLockedFn
   timeout?: number
   retryInterval?: number
 }
@@ -54,7 +57,7 @@ interface RWLockfileJSON {
 }
 
 export interface IfLockedFn {
-  (): Promise<void> | void
+  ({status}: {status: Status}): Promise<void> | void
 }
 
 export class RWLockfile {
@@ -184,7 +187,7 @@ export class RWLockfile {
         await this.writeFile(f)
         return this.check(type)
       }
-      if (!status.jobs.find(j => j.uuid !== this.uuid)) return { status: 'open' }
+      if (!status.jobs.find(j => j.uuid !== this.uuid)) return { status: 'open', file: this.file }
       return status
     } else throw new Error(`Unexpected status: ${status!.status}`)
   }
@@ -210,17 +213,17 @@ export class RWLockfile {
         this.writeFileSync(f)
         return this.checkSync(type)
       }
-      if (!status.jobs.find(j => j.uuid !== this.uuid)) return { status: 'open' }
+      if (!status.jobs.find(j => j.uuid !== this.uuid)) return { status: 'open', file: this.file }
       return status
     } else throw new Error(`Unexpected status: ${status!.status}`)
   }
 
   private _statusFromFile(type: RWLockType, f: RWLockfileJSON): Status {
-    if (f.writer) return { status: 'write_lock', job: f.writer }
+    if (f.writer) return { status: 'write_lock', job: f.writer, file: this.file }
     if (type === 'write') {
-      if (f.readers.length) return { status: 'read_lock', jobs: f.readers }
+      if (f.readers.length) return { status: 'read_lock', jobs: f.readers, file: this.file }
     }
-    return { status: 'open' }
+    return { status: 'open', file: this.file }
   }
 
   private _parseFile(input: any): RWLockfileJSON {
@@ -324,14 +327,14 @@ export class RWLockfile {
   async _lock(type: RWLockType, opts: RWLockOptions): Promise<void> {
     opts.timeout = opts.timeout || this.timeout
     opts.retryInterval = opts.retryInterval || this.retryInterval
-    let ifLockedCb = once(opts.ifLocked || this.ifLocked)
+    let ifLockedCb = once<IfLockedFn>(opts.ifLocked || this.ifLocked)
     while (true) {
       try {
         await this._tryLock(type, opts.reason)
         return
       } catch (err) {
         if (err.code !== 'ELOCK') throw err
-        await ifLockedCb()
+        await ifLockedCb(err.status)
         if (opts.timeout < 0) throw err
 
         // try again
@@ -438,14 +441,13 @@ function random(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min) + min)
 }
 
-function once(fn: Function) {
-  return () => {
-    try {
-      return fn()
-    } finally {
-      fn = () => {}
-    }
-  }
+function once<T extends (...args: any[]) => any>(fn: T): T {
+  let ran = false
+  return ((...args: any[]) => {
+    if (ran) return
+    ran = true
+    return fn(...args)
+  }) as any
 }
 
 export default RWLockfile

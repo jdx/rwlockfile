@@ -53,7 +53,7 @@ describe('rwlockfile', () => {
     try {
       await b.add('write', {ifLocked})
     } catch (err) {
-      expect(ifLocked).toBeCalledWith()
+      expect(ifLocked).toBeCalled()
     }
   })
 
@@ -65,7 +65,7 @@ describe('rwlockfile', () => {
     try {
       await b.add('write')
     } catch (err) {
-      expect(ifLocked).toBeCalledWith()
+      expect(ifLocked).toBeCalled()
     }
   })
 
@@ -122,14 +122,14 @@ describe('rwlockfile', () => {
     await a.add('read')
     await a.add('write')
     await a.unlock()
-    expect(await b.check('write')).toEqual({ status: 'open' })
+    expect(await b.check('write')).toHaveProperty('status', 'open')
   })
 
   test('unlock all sync', () => {
     a.addSync('read')
     a.addSync('write')
     a.unlockSync()
-    expect(b.checkSync('write')).toEqual({ status: 'open' })
+    expect(b.checkSync('write')).toHaveProperty('status', 'open')
   })
 
   test('removes inactive readers and writers sync', () => {
@@ -146,7 +146,7 @@ describe('rwlockfile', () => {
         uuid: 'fakeuuid',
       },
     })
-    expect(b.checkSync('write')).toEqual({ status: 'open' })
+    expect(b.checkSync('write')).toHaveProperty('status', 'open')
   })
 
   test('removes inactive readers and writers', async () => {
@@ -163,6 +163,6 @@ describe('rwlockfile', () => {
         uuid: 'fakeuuid',
       },
     })
-    expect(await b.check('write')).toEqual({ status: 'open' })
+    expect(await b.check('write')).toHaveProperty('status', 'open')
   })
 })
