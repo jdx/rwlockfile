@@ -11,7 +11,7 @@ export function lockfileSync(prop: string) {
     let fn: any = function(this: any, ...args: any[]) {
       const lockfile: L.default = this[prop]
       if (!(lockfile instanceof Lockfile)) {
-        throw new Error('prop does not point to a RWLockfile instance')
+        throw new Error('prop does not point to a Lockfile instance')
       }
       lockfile.addSync({ reason: name })
       try {
@@ -51,7 +51,11 @@ export function lockfile(prop: string) {
   }
 }
 
-export function rwlockfile(prop: string, type: 'read' | 'write') {
+export interface RWLockfileOptions {
+  ifLocked?: string
+}
+
+export function rwlockfile(prop: string, type: 'read' | 'write', opts: RWLockfileOptions = {}) {
   const RWLockfile = require('./rwlockfile').default
   return (_: any, name: string, descriptor: TypedPropertyDescriptor<(...args: any[]) => Promise<any>>) => {
     if (!descriptor || (!descriptor.value && !descriptor.get)) {
@@ -63,7 +67,14 @@ export function rwlockfile(prop: string, type: 'read' | 'write') {
       if (!(lockfile instanceof RWLockfile)) {
         throw new Error('prop does not point to a Lockfile instance')
       }
-      await lockfile.add(type, { reason: name })
+
+      const addOpts: RWL.RWLockOptions = {
+        reason: name
+      }
+      if (opts.ifLocked) {
+        addOpts.ifLocked = () => this[opts.ifLocked as any]()
+      }
+      await lockfile.add(type, addOpts)
       let result
       try {
         result = await originalMethod!.apply(this, args)

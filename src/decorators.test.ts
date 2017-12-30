@@ -185,7 +185,7 @@ describe('rwlockfile', () => {
       })
     }
 
-    @rwlockfile('mylock', 'read')
+    @rwlockfile('mylock', 'write')
     async run(n: number) {
       this.info.push('start')
       await wait(1)
@@ -219,5 +219,35 @@ describe('rwlockfile', () => {
       @rwlockfile('foo', 'bar')
       class {}
     }).toThrow('Only put the @rwlockfile decorator on a method or getter')
+  })
+
+  test('ifLocked', async () => {
+    class MyLockClass {
+      mylock: RWLockfile
+      info: string[] = []
+
+      constructor(lockfilePath: string) {
+        this.mylock = new RWLockfile(lockfilePath, {
+          debug: require('debug')('lockfile'),
+        })
+      }
+
+      @rwlockfile('mylock', 'write', {ifLocked: 'runIfLocked'})
+      async run() {
+        this.info.push('start')
+        await wait(10)
+        this.info.push('done')
+      }
+
+      protected runIfLocked () {
+        this.info.push('runIfLocked')
+      }
+    }
+
+    let a = new MyLockClass(lockfilePath)
+    let b = new MyLockClass(lockfilePath)
+    a.run()
+    await b.run()
+    expect(b.info).toEqual(['runIfLocked', 'start', 'done'])
   })
 })

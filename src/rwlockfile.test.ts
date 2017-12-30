@@ -46,6 +46,17 @@ describe('rwlockfile', () => {
     b.addSync('read')
   })
 
+  test('ifLocked', async () => {
+    await a.add('write')
+    const ifLocked = jest.fn()
+    expect.assertions(1)
+    try {
+      await b.add('write', {ifLocked})
+    } catch (err) {
+      expect(ifLocked).toBeCalledWith()
+    }
+  })
+
   test('cannot get a write lock when reader lock', async () => {
     expect.assertions(2)
     await a.remove('read')
