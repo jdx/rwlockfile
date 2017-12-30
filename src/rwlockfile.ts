@@ -284,14 +284,6 @@ export class RWLockfile {
     }
   }
 
-  private writeFile(f: RWLockfileJSON): Promise<void> {
-    return this.fs.outputJSON(this.file, this._stringifyFile(f))
-  }
-
-  private writeFileSync(f: RWLockfileJSON): void {
-    this.fs.outputJSONSync(this.file, this._stringifyFile(f))
-  }
-
   private addJob(type: RWLockType, reason: string | undefined, f: RWLockfileJSON): void {
     let job: Job = {
       reason,
@@ -369,6 +361,26 @@ export class RWLockfile {
     this.writeFileSync(f)
   }
 
+  private async writeFile(f: RWLockfileJSON): Promise<void> {
+    if (!f.writer && !f.readers.length) {
+      await this.fs.remove(this.file)
+    } else {
+      await this.fs.outputJSON(this.file, this._stringifyFile(f))
+    }
+  }
+
+  private writeFileSync(f: RWLockfileJSON): void {
+    if (!f.writer && !f.readers.length) {
+      try {
+        this.fs.unlinkSync(this.file)
+      } catch (err) {
+        if (err.code !== 'ENOENT') throw err
+      }
+    } else {
+      this.fs.outputJSONSync(this.file, this._stringifyFile(f))
+    }
+  }
+
   private get debug() {
     return this._debug || ((..._: any[]) => {})
   }
@@ -382,7 +394,7 @@ export class RWLockfile {
     const read = this.count['read'] + (type === 'read' ? operator : '')
     const write = this.count['write'] + (type === 'write' ? operator : '')
     reason = reason ? ` reason:${reason}` : ''
-    this.debug(`${action}:${type} read:${read} write:${write} ${reason} ${this.file}`)
+    this.debug(`${action}:${type} read:${read} write:${write}${reason} ${this.file}`)
   }
 }
 

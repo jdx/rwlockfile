@@ -175,4 +175,22 @@ describe('rwlockfile', () => {
     })
     expect(await b.check('write')).toHaveProperty('status', 'open')
   })
+
+  test('removes file when unlocks sync', () => {
+    a.addSync('write')
+    a.addSync('read')
+    expect(fs.existsSync(a.file)).toEqual(true)
+    a.unlockSync()
+    expect(fs.existsSync(a.file)).toEqual(false)
+  })
+
+  test('removes file when unlocks', async () => {
+    await a.add('write')
+    await a.add('read')
+    // @ts-ignore
+    await expect(fs.exists(a.file)).resolves.toEqual(true)
+    await a.unlock()
+    // @ts-ignore
+    await expect(fs.exists(a.file)).resolves.toEqual(false)
+  })
 })
