@@ -12,14 +12,11 @@ const debug = require('debug')
 jest.useRealTimers()
 jest.setTimeout(10000)
 
-beforeEach(() => {
+beforeEach(async () => {
   debug('lock:test')('beforeEach')
   f = path.join(dir, count.toString())
+  await fs.remove(f)
   count++
-})
-
-afterAll(async () => {
-  await fs.remove(path.join(__dirname, '../tmp'))
 })
 
 describe('rwlockfile', () => {

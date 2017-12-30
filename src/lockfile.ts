@@ -167,7 +167,7 @@ export default class Lockfile {
   }
 
   private get _infoPath() {
-    return path.resolve(this.dirPath + 'info.json')
+    return path.resolve(this.dirPath + '.info.json')
   }
 
   private async fetchReason(): Promise<string | undefined> {
@@ -317,6 +317,7 @@ export default class Lockfile {
           } catch (err) {
             if (err.code !== 'ENOENT') throw err
           }
+          return this._lockSync(opts)
         case 'open':
         case 'have_lock':
           return this._lockSync(opts)
