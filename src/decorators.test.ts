@@ -7,6 +7,14 @@ function wait(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
+let count = 0
+let lockfilePath: string
+
+beforeEach(() => {
+  count++
+  lockfilePath = path.join(__dirname, `../tmp/test/decorators/${count}`)
+})
+
 describe('onceAtATime', () => {
   class MyClass {
     calls: string[] = []
@@ -101,8 +109,6 @@ describe('onceAtATime', () => {
 })
 
 describe('lockfile', () => {
-  let count = 0
-  let lockfilePath
   class MyLockClass {
     mylock: Lockfile
     info: string[] = []
@@ -126,8 +132,6 @@ describe('lockfile', () => {
   let b: MyLockClass
 
   beforeEach(() => {
-    count++
-    lockfilePath = path.join(__dirname, `../tmp/test/decorators/${count}`)
     a = new MyLockClass(lockfilePath)
     b = new MyLockClass(lockfilePath)
   })
@@ -145,8 +149,6 @@ describe('lockfile', () => {
 })
 
 describe('rwlockfile', () => {
-  let count = 0
-  let lockfilePath
   class MyLockClass {
     mylock: RWLockfile
     info: string[] = []
@@ -170,8 +172,6 @@ describe('rwlockfile', () => {
   let b: MyLockClass
 
   beforeEach(() => {
-    count++
-    lockfilePath = path.join(__dirname, `../tmp/test/decorators/${count}`)
     a = new MyLockClass(lockfilePath)
     b = new MyLockClass(lockfilePath)
   })
