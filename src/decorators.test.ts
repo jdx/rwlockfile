@@ -1,7 +1,7 @@
 import * as path from 'path'
 import Lockfile from './lockfile'
 import RWLockfile from './rwlockfile'
-import { rwlockfile, lockfile, onceAtATime } from './decorators'
+import { rwlockfile, lockfile, lockfileSync, onceAtATime } from './decorators'
 
 function wait(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms))
@@ -106,6 +106,14 @@ describe('onceAtATime', () => {
       expect(a.calls).toEqual(['1', '2'])
     })
   })
+
+  test('fails on a class', () => {
+    expect(() => {
+      // @ts-ignore
+      @onceAtATime()
+      class {}
+    }).toThrow('Only put the @onceAtATime decorator on a method or getter')
+  })
 })
 
 describe('lockfile', () => {
@@ -136,7 +144,7 @@ describe('lockfile', () => {
     b = new MyLockClass(lockfilePath)
   })
 
-  test('it locks', async () => {
+  test.only('it locks', async () => {
     let apromise = a.run(1)
     let bpromise = b.run(2)
     expect(await apromise).toEqual('n: 1')
@@ -145,6 +153,25 @@ describe('lockfile', () => {
     expect(await bpromise).toEqual('n: 2')
     expect(a.info).toEqual(['start', 'done'])
     expect(b.info).toEqual(['start', 'done'])
+  })
+
+  test('fails on a class', () => {
+    expect(() => {
+      // @ts-ignore
+      @lockfile('lock', 'foo')
+      class {}
+    }).toThrow('Only put the @lockfile decorator on a method or getter')
+  })
+})
+
+describe('lockfileSync', () => {
+
+  test('fails on a class', () => {
+    expect(() => {
+      // @ts-ignore
+      @lockfileSync('lock', 'foo')
+      class {}
+    }).toThrow('Only put the @lockfileSync decorator on a method or getter')
   })
 })
 
@@ -185,5 +212,13 @@ describe('rwlockfile', () => {
     expect(await bpromise).toEqual('n: 2')
     expect(a.info).toEqual(['start', 'done'])
     expect(b.info).toEqual(['start', 'done'])
+  })
+
+  test('fails on a class', () => {
+    expect(() => {
+      // @ts-ignore
+      @rwlockfile('foo', 'bar')
+      class {}
+    }).toThrow('Only put the @rwlockfile decorator on a method or getter')
   })
 })

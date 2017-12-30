@@ -4,8 +4,8 @@ import RWL = require('./rwlockfile')
 export function lockfileSync (prop: string) {
   const Lockfile = require('./lockfile').default
   return (_: any, name: string, descriptor: TypedPropertyDescriptor<(...args: any[]) => any>) => {
-    if (!descriptor.value && !descriptor.get) {
-      throw new Error('Only put the @lockfile decorator on a method or getter.')
+    if (!descriptor || (!descriptor.value && !descriptor.get)) {
+      throw new Error('Only put the @lockfileSync decorator on a method or getter.')
     }
     const originalMethod = descriptor.value || descriptor.get
     let fn: any = function(this: any, ...args: any[]) {
@@ -29,7 +29,7 @@ export function lockfileSync (prop: string) {
 export function lockfile (prop: string) {
   const Lockfile = require('./lockfile').default
   return (_: any, name: string, descriptor: TypedPropertyDescriptor<(...args: any[]) => Promise<any>>) => {
-    if (!descriptor.value && !descriptor.get) {
+    if (!descriptor || (!descriptor.value && !descriptor.get)) {
       throw new Error('Only put the @lockfile decorator on a method or getter.')
     }
     const originalMethod = descriptor.value || descriptor.get
@@ -54,8 +54,8 @@ export function lockfile (prop: string) {
 export function rwlockfile (prop: string, type: 'read' | 'write') {
   const RWLockfile = require('./rwlockfile').default
   return (_: any, name: string, descriptor: TypedPropertyDescriptor<(...args: any[]) => Promise<any>>) => {
-    if (!descriptor.value && !descriptor.get) {
-      throw new Error('Only put the @lockfile decorator on a method or getter.')
+    if (!descriptor || (!descriptor.value && !descriptor.get)) {
+      throw new Error('Only put the @rwlockfile decorator on a method or getter.')
     }
     const originalMethod = descriptor.value || descriptor.get
     let fn: any = async function(this: any, ...args: any[]) {
@@ -79,7 +79,7 @@ export function rwlockfile (prop: string, type: 'read' | 'write') {
 export function onceAtATime(argKey?: number) {
   const key = Symbol('onceAtATimeKey')
   return (_: any, __: string, descriptor: TypedPropertyDescriptor<(...args: any[]) => Promise<any>>) => {
-    if (!descriptor.value && !descriptor.get) {
+    if (!descriptor || (!descriptor.value && !descriptor.get)) {
       throw new Error('Only put the @onceAtATime decorator on a method or getter.')
     }
     const originalMethod = descriptor.value || descriptor.get
