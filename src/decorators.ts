@@ -1,4 +1,5 @@
 import L = require('./lockfile')
+import RWL = require('./rwlockfile')
 
 export function lockfileSync (prop: string) {
   const Lockfile = require('./lockfile').default
@@ -10,7 +11,7 @@ export function lockfileSync (prop: string) {
     let fn: any = function(this: any, ...args: any[]) {
       const lockfile: L.default = this[prop]
       if (!(lockfile instanceof Lockfile)) {
-        throw new Error('prop does not point to a Lockfile instance')
+        throw new Error('prop does not point to a RWLockfile instance')
       }
       lockfile.addSync({reason: name})
       try {
@@ -27,7 +28,7 @@ export function lockfileSync (prop: string) {
 
 export function lockfile (prop: string) {
   const Lockfile = require('./lockfile').default
-  return (_: any, name: string, descriptor: TypedPropertyDescriptor<(...args: any[]) => any>) => {
+  return (_: any, name: string, descriptor: TypedPropertyDescriptor<(...args: any[]) => Promise<any>>) => {
     if (!descriptor.value && !descriptor.get) {
       throw new Error('Only put the @lockfile decorator on a method or getter.')
     }
@@ -42,6 +43,31 @@ export function lockfile (prop: string) {
         return await originalMethod!.apply(this, args)
       } finally {
         await lockfile.remove()
+      }
+    }
+    if (descriptor.value) descriptor.value = fn
+    else descriptor.get = fn
+    return descriptor
+  }
+}
+
+export function rwlockfile (prop: string, type: 'read' | 'write') {
+  const RWLockfile = require('./rwlockfile').default
+  return (_: any, name: string, descriptor: TypedPropertyDescriptor<(...args: any[]) => Promise<any>>) => {
+    if (!descriptor.value && !descriptor.get) {
+      throw new Error('Only put the @lockfile decorator on a method or getter.')
+    }
+    const originalMethod = descriptor.value || descriptor.get
+    let fn: any = async function(this: any, ...args: any[]) {
+      const lockfile: RWL.default = this[prop]
+      if (!(lockfile instanceof RWLockfile)) {
+        throw new Error('prop does not point to a Lockfile instance')
+      }
+      await lockfile.add(type, {reason: name})
+      try {
+        return await originalMethod!.apply(this, args)
+      } finally {
+        await lockfile.remove(type)
       }
     }
     if (descriptor.value) descriptor.value = fn

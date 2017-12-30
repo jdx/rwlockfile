@@ -1,7 +1,7 @@
 import RWLockfile from './rwlockfile'
-import Lockfile from './lockfile'
-import { LockfileError } from './errors'
+export {default as Lockfile} from './lockfile'
+export { LockfileError } from './errors'
+export {rwlockfile, lockfile, lockfileSync} from './decorators'
 
-export { RWLockfile, Lockfile, LockfileError }
-
+export { RWLockfile }
 export default RWLockfile
