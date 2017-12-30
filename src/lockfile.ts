@@ -189,27 +189,21 @@ export default class Lockfile {
   }
 
   private async _saveReason(reason: string | undefined): Promise<void> {
-    await this.fs.writeJSON(
-      this._infoPath,
-      {
-        version,
-        uuid: this.uuid,
-        pid: process.pid,
-        reason,
-      },
-    )
+    await this.fs.writeJSON(this._infoPath, {
+      version,
+      uuid: this.uuid,
+      pid: process.pid,
+      reason,
+    })
   }
 
   private _saveReasonSync(reason: string | undefined): void {
-    this.fs.writeJSONSync(
-      this._infoPath,
-      {
-        version,
-        uuid: this.uuid,
-        pid: process.pid,
-        reason,
-      },
-    )
+    this.fs.writeJSONSync(this._infoPath, {
+      version,
+      uuid: this.uuid,
+      pid: process.pid,
+      reason,
+    })
   }
 
   private async fetchMtime(): Promise<Date | undefined> {

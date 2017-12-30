@@ -121,9 +121,9 @@ describe('lockfile', () => {
     mylock: Lockfile
     info: string[] = []
 
-    constructor (lockfilePath: string) {
+    constructor(lockfilePath: string) {
       this.mylock = new Lockfile(lockfilePath, {
-        debug: require('debug')('lockfile')
+        debug: require('debug')('lockfile'),
       })
     }
 
@@ -165,7 +165,6 @@ describe('lockfile', () => {
 })
 
 describe('lockfileSync', () => {
-
   test('fails on a class', () => {
     expect(() => {
       // @ts-ignore
@@ -180,9 +179,9 @@ describe('rwlockfile', () => {
     mylock: RWLockfile
     info: string[] = []
 
-    constructor (lockfilePath: string) {
+    constructor(lockfilePath: string) {
       this.mylock = new RWLockfile(lockfilePath, {
-        debug: require('debug')('lockfile')
+        debug: require('debug')('lockfile'),
       })
     }
 

@@ -1,23 +1,27 @@
-import {spawn, spawnSync} from 'child_process'
-import {lockfile, lockfileSync, onceAtATime} from './decorators'
+import { spawn, spawnSync } from 'child_process'
+import { lockfile, lockfileSync, onceAtATime } from './decorators'
 import * as FS from 'fs-extra'
 import * as path from 'path'
-import Lockfile, {LockfileOptions} from './lockfile'
-import {RWLockfileError} from './errors'
+import Lockfile, { LockfileOptions } from './lockfile'
+import { RWLockfileError } from './errors'
 
 const version = require('../package.json').version
 
-export type ReadStatus = {
-  status: 'open'
-} | {
-  status: 'write_lock'
-  job: Job
-}
+export type ReadStatus =
+  | {
+      status: 'open'
+    }
+  | {
+      status: 'write_lock'
+      job: Job
+    }
 
-export type WriteStatus = ReadStatus | {
-  status: 'read_lock'
-  jobs: Job[]
-}
+export type WriteStatus =
+  | ReadStatus
+  | {
+      status: 'read_lock'
+      jobs: Job[]
+    }
 
 export type Status = WriteStatus
 
@@ -160,11 +164,12 @@ export class RWLockfile {
         return this.check(type)
       }
       return status
-    }
-    else if (status.status === 'read_lock') {
-      const pids = await Promise.all(status.jobs.map(async j => {
-        if (!await pidActive(j.pid)) return j.pid
-      }))
+    } else if (status.status === 'read_lock') {
+      const pids = await Promise.all(
+        status.jobs.map(async j => {
+          if (!await pidActive(j.pid)) return j.pid
+        }),
+      )
       const inactive = pids.filter(p => !!p)
       if (inactive.length) {
         this.debug(`removing inactive read pids: ${inactive}`)
@@ -172,10 +177,9 @@ export class RWLockfile {
         await this.writeFile(f)
         return this.check(type)
       }
-      if (!status.jobs.find(j => j.uuid !== this.uuid)) return {status: 'open'}
+      if (!status.jobs.find(j => j.uuid !== this.uuid)) return { status: 'open' }
       return status
-    }
-    else throw new Error(`Unexpected status: ${status!.status}`)
+    } else throw new Error(`Unexpected status: ${status!.status}`)
   }
 
   @lockfileSync('internal')
@@ -191,8 +195,7 @@ export class RWLockfile {
         return this.checkSync(type)
       }
       return status
-    }
-    else if (status.status === 'read_lock') {
+    } else if (status.status === 'read_lock') {
       const inactive = status.jobs.map(j => j.pid).filter(pid => !pidActiveSync(pid))
       if (inactive.length) {
         this.debug(`removing inactive reader pids: ${inactive}`)
@@ -200,18 +203,17 @@ export class RWLockfile {
         this.writeFileSync(f)
         return this.checkSync(type)
       }
-      if (!status.jobs.find(j => j.uuid !== this.uuid)) return {status: 'open'}
+      if (!status.jobs.find(j => j.uuid !== this.uuid)) return { status: 'open' }
       return status
-    }
-    else throw new Error(`Unexpected status: ${status!.status}`)
+    } else throw new Error(`Unexpected status: ${status!.status}`)
   }
 
   private _statusFromFile(type: RWLockType, f: RWLockfileJSON): Status {
-    if (f.writer) return {status: 'write_lock', job: f.writer}
+    if (f.writer) return { status: 'write_lock', job: f.writer }
     if (type === 'write') {
-      if (f.readers.length) return {status: 'read_lock', jobs: f.readers}
+      if (f.readers.length) return { status: 'read_lock', jobs: f.readers }
     }
-    return {status: 'open'}
+    return { status: 'open' }
   }
 
   private _parseFile(input: any): RWLockfileJSON {
@@ -316,7 +318,7 @@ export class RWLockfile {
     opts.timeout = opts.timeout || this.timeout
     opts.retryInterval = opts.retryInterval || this.retryInterval
     let ifLockedCb = once(opts.ifLocked || (() => {}))
-    while(true) {
+    while (true) {
       try {
         await this._tryLock(type, opts.reason)
         return
@@ -326,7 +328,7 @@ export class RWLockfile {
         if (opts.timeout < 0) throw err
 
         // try again
-        const interval = random(opts.retryInterval/2, opts.retryInterval*2)
+        const interval = random(opts.retryInterval / 2, opts.retryInterval * 2)
         await wait(interval)
         opts.timeout -= interval
       }
@@ -357,7 +359,9 @@ export class RWLockfile {
     this.writeFileSync(f)
   }
 
-  private get debug() { return this._debug || ((..._: any[]) => {}) }
+  private get debug() {
+    return this._debug || ((..._: any[]) => {})
+  }
   private _debugReport(
     action: 'add' | 'addSync' | 'remove' | 'removeSync' | 'unlock' | 'unlockSync',
     type: RWLockType,
@@ -376,22 +380,20 @@ process.once('exit', () => {
 })
 
 function debugEnvVar(): number {
-  return (process.env.RWLOCKFILE_DEBUG === '1' && 1)
-  || (process.env.RWLOCKFILE_DEBUG === '2' && 2)
-  || 0
+  return (process.env.RWLOCKFILE_DEBUG === '1' && 1) || (process.env.RWLOCKFILE_DEBUG === '2' && 2) || 0
 }
 
-function pidActiveSync (pid: number): boolean {
+function pidActiveSync(pid: number): boolean {
   if (!pid || isNaN(pid)) return false
   return process.platform === 'win32' ? pidActiveWindowsSync(pid) : pidActiveUnix(pid)
 }
 
-async function pidActive (pid: number): Promise<boolean> {
+async function pidActive(pid: number): Promise<boolean> {
   if (!pid || isNaN(pid)) return false
   return process.platform === 'win32' ? pidActiveWindows(pid) : pidActiveUnix(pid)
 }
 
-function pidActiveWindows (pid: number): Promise<boolean> {
+function pidActiveWindows(pid: number): Promise<boolean> {
   return new Promise((resolve, reject) => {
     const p = spawn('tasklist', ['/fi', `PID eq ${pid}`])
     p.on('close', code => {
@@ -403,14 +405,17 @@ function pidActiveWindows (pid: number): Promise<boolean> {
   })
 }
 
-function pidActiveWindowsSync (pid: number): boolean {
-  const {stdout, error, status} = spawnSync('tasklist', ['/fi', `PID eq ${pid}`], {stdio: [0, null, 2], encoding: 'utf8'})
+function pidActiveWindowsSync(pid: number): boolean {
+  const { stdout, error, status } = spawnSync('tasklist', ['/fi', `PID eq ${pid}`], {
+    stdio: [0, null, 2],
+    encoding: 'utf8',
+  })
   if (error) throw error
   if (status !== 0) throw new Error(`tasklist exited with code ${status}`)
   return !stdout.includes('No tasks are running')
 }
 
-function pidActiveUnix (pid: number): boolean {
+function pidActiveUnix(pid: number): boolean {
   try {
     return !!process.kill(pid, 0)
   } catch (e) {
@@ -426,7 +431,7 @@ function random(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min) + min)
 }
 
-function once (fn: Function) {
+function once(fn: Function) {
   return () => {
     try {
       return fn()

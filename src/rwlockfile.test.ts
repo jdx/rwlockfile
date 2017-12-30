@@ -60,7 +60,7 @@ describe('rwlockfile', () => {
     } catch (err) {
       await expect(err.message).toMatch(/^read lock exists/)
     }
-    await b.add('read', {reason: 'mylock'})
+    await b.add('read', { reason: 'mylock' })
     await a.remove('read')
     await a.add('read')
     try {
@@ -91,7 +91,7 @@ describe('rwlockfile', () => {
   })
 
   test('shows reason sync', () => {
-    a.addSync('read', {reason: 'myreason'})
+    a.addSync('read', { reason: 'myreason' })
     expect(() => b.addSync('write')).toThrowError(/lock exists: myreason/)
   })
 
@@ -99,43 +99,47 @@ describe('rwlockfile', () => {
     await a.add('read')
     await a.add('write')
     await a.unlock()
-    expect(await b.check('write')).toEqual({status: 'open'})
+    expect(await b.check('write')).toEqual({ status: 'open' })
   })
 
   test('unlock all sync', () => {
     a.addSync('read')
     a.addSync('write')
     a.unlockSync()
-    expect(b.checkSync('write')).toEqual({status: 'open'})
+    expect(b.checkSync('write')).toEqual({ status: 'open' })
   })
 
   test('removes inactive readers and writers sync', () => {
     fs.outputJSONSync(path.join(f + '.lock'), {
       version: '2.0.0',
-      readers: [{
-        pid: 1000000,
-        uuid: 'fakeuuid',
-      }],
+      readers: [
+        {
+          pid: 1000000,
+          uuid: 'fakeuuid',
+        },
+      ],
       writer: {
         pid: 1000000,
         uuid: 'fakeuuid',
-      }
+      },
     })
-    expect(b.checkSync('write')).toEqual({status: 'open'})
+    expect(b.checkSync('write')).toEqual({ status: 'open' })
   })
 
   test('removes inactive readers and writers', async () => {
     fs.outputJSONSync(path.join(f + '.lock'), {
       version: '2.0.0',
-      readers: [{
-        pid: 1000000,
-        uuid: 'fakeuuid',
-      }],
+      readers: [
+        {
+          pid: 1000000,
+          uuid: 'fakeuuid',
+        },
+      ],
       writer: {
         pid: 1000000,
         uuid: 'fakeuuid',
-      }
+      },
     })
-    expect(await b.check('write')).toEqual({status: 'open'})
+    expect(await b.check('write')).toEqual({ status: 'open' })
   })
 })

@@ -1,4 +1,4 @@
-import {Status} from './rwlockfile'
+import { Status } from './rwlockfile'
 
 export class LockfileError extends Error {
   code = 'ELOCK'
@@ -12,13 +12,13 @@ export class LockfileError extends Error {
 }
 
 export class RWLockfileError extends LockfileError {
-  constructor (status: Status, file: string) {
+  constructor(status: Status, file: string) {
     switch (status.status) {
       case 'write_lock':
-        super({file, msg: `write lock exists: ${status.job.reason || ''}`})
+        super({ file, msg: `write lock exists: ${status.job.reason || ''}` })
         return
       case 'read_lock':
-        super({file, msg: `read lock exists: ${status.jobs[0].reason || ''}`})
+        super({ file, msg: `read lock exists: ${status.jobs[0].reason || ''}` })
         return
       default:
         throw new Error(`Unexpected status: ${status.status}`)

@@ -1,7 +1,7 @@
 import L = require('./lockfile')
 import RWL = require('./rwlockfile')
 
-export function lockfileSync (prop: string) {
+export function lockfileSync(prop: string) {
   const Lockfile = require('./lockfile').default
   return (_: any, name: string, descriptor: TypedPropertyDescriptor<(...args: any[]) => any>) => {
     if (!descriptor || (!descriptor.value && !descriptor.get)) {
@@ -13,7 +13,7 @@ export function lockfileSync (prop: string) {
       if (!(lockfile instanceof Lockfile)) {
         throw new Error('prop does not point to a RWLockfile instance')
       }
-      lockfile.addSync({reason: name})
+      lockfile.addSync({ reason: name })
       try {
         return originalMethod!.apply(this, args)
       } finally {
@@ -26,7 +26,7 @@ export function lockfileSync (prop: string) {
   }
 }
 
-export function lockfile (prop: string) {
+export function lockfile(prop: string) {
   const Lockfile = require('./lockfile').default
   return (_: any, name: string, descriptor: TypedPropertyDescriptor<(...args: any[]) => Promise<any>>) => {
     if (!descriptor || (!descriptor.value && !descriptor.get)) {
@@ -38,7 +38,7 @@ export function lockfile (prop: string) {
       if (!(lockfile instanceof Lockfile)) {
         throw new Error('prop does not point to a Lockfile instance')
       }
-      await lockfile.add({reason: name})
+      await lockfile.add({ reason: name })
       try {
         return await originalMethod!.apply(this, args)
       } finally {
@@ -51,7 +51,7 @@ export function lockfile (prop: string) {
   }
 }
 
-export function rwlockfile (prop: string, type: 'read' | 'write') {
+export function rwlockfile(prop: string, type: 'read' | 'write') {
   const RWLockfile = require('./rwlockfile').default
   return (_: any, name: string, descriptor: TypedPropertyDescriptor<(...args: any[]) => Promise<any>>) => {
     if (!descriptor || (!descriptor.value && !descriptor.get)) {
@@ -63,7 +63,7 @@ export function rwlockfile (prop: string, type: 'read' | 'write') {
       if (!(lockfile instanceof RWLockfile)) {
         throw new Error('prop does not point to a Lockfile instance')
       }
-      await lockfile.add(type, {reason: name})
+      await lockfile.add(type, { reason: name })
       let result
       try {
         result = await originalMethod!.apply(this, args)
