@@ -72,7 +72,7 @@ describe('rwlockfile', () => {
     expect(() => b.addSync('write')).toThrowError(/lock exists: myreason/)
   })
 
-  test.only('unlock all', async () => {
+  test('unlock all', async () => {
     await a.add('read')
     await a.add('write')
     await a.unlock()
