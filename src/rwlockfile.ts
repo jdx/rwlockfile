@@ -382,7 +382,7 @@ export class RWLockfile {
     const read = this.count['read'] + (type === 'read' ? operator : '')
     const write = this.count['write'] + (type === 'write' ? operator : '')
     reason = reason ? ` reason:${reason}` : ''
-    this.debug(`${action}:${type} read:${read}${reason} write:${write} ${this.file}`)
+    this.debug(`${action}:${type} read:${read} write:${write} ${reason} ${this.file}`)
   }
 }
 
