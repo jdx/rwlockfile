@@ -125,7 +125,8 @@ export class RWLockfile {
 
   async unlock(type?: RWLockType): Promise<void> {
     if (!type) {
-      await Promise.all([this.unlock('read'), this.unlock('write')])
+      await this.unlock('read')
+      await this.unlock('write')
       return
     }
     if (!this.count[type]) return
