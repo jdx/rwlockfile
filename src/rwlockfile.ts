@@ -168,7 +168,8 @@ export class RWLockfile {
       const inactive = pids.filter(p => !!p)
       if (inactive.length) {
         this.debug(`removing inactive read pids: ${inactive}`)
-        f.readers = f.readers.filter(j => inactive.includes(j.pid))
+        f.readers = f.readers.filter(j => !inactive.includes(j.pid))
+        await this.writeFile(f)
         return this.check(type)
       }
       if (!status.jobs.find(j => j.uuid !== this.uuid)) return {status: 'open'}
@@ -195,7 +196,8 @@ export class RWLockfile {
       const inactive = status.jobs.map(j => j.pid).filter(pid => !pidActiveSync(pid))
       if (inactive.length) {
         this.debug(`removing inactive reader pids: ${inactive}`)
-        f.readers = f.readers.filter(j => inactive.includes(j.pid))
+        f.readers = f.readers.filter(j => !inactive.includes(j.pid))
+        this.writeFileSync(f)
         return this.checkSync(type)
       }
       if (!status.jobs.find(j => j.uuid !== this.uuid)) return {status: 'open'}
@@ -213,23 +215,34 @@ export class RWLockfile {
   }
 
   private _parseFile(input: any): RWLockfileJSON {
-    function addDates(readers?: Job[]) {
-      return (readers || []).map(r => ({
-        ...r,
-        created: new Date(r.created),
-      }))
+    function addDate(job?: Job) {
+      if (!job) return
+      return {
+        ...job,
+        created: new Date(job.created || 0),
+      }
     }
 
     return {
       ...input,
-      readers: addDates(input.readers),
+      writer: addDate(input.writer),
+      readers: input.readers.map(addDate),
     }
   }
 
   private _stringifyFile(input: RWLockfileJSON): any {
+    function addDate(job?: Job) {
+      if (!job) return
+      return {
+        ...job,
+        created: (job.created || new Date(0)).toISOString(),
+      }
+    }
+
     return {
       ...input,
-      readers: (input.readers || []).map(r => ({ ...r, created: r.created.toISOString() })),
+      writer: addDate(input.writer),
+      readers: (input.readers || []).map(addDate),
     }
   }
 

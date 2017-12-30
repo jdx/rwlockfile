@@ -16,6 +16,7 @@ beforeEach(async () => {
   debug('lock:test')('beforeEach')
   f = path.join(dir, count.toString())
   await fs.remove(f)
+  f = path.join(f, count.toString())
   count++
 })
 
@@ -160,7 +161,7 @@ test('stale sync', async () => {
   a.lockSync()
 })
 
-test('needs to be stale enough sync', async () => {
+test('needs to be stale enough sync', () => {
   fs.mkdirpSync(a.dirPath)
   expect(a.checkSync()).toEqual(false)
   const now = Date.now() / 1000

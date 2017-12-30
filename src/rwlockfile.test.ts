@@ -16,6 +16,7 @@ beforeEach(async () => {
   debug('lock:test')('beforeEach')
   f = path.join(dir, count.toString())
   await fs.remove(f)
+  f = path.join(f, count.toString())
   count++
 })
 
@@ -90,5 +91,35 @@ describe('rwlockfile', () => {
     a.addSync('write')
     a.unlockSync()
     expect(b.checkSync('write')).toEqual({status: 'open'})
+  })
+
+  test('removes inactive readers and writers sync', () => {
+    fs.outputJSONSync(path.join(f + '.lock'), {
+      version: '2.0.0',
+      readers: [{
+        pid: 1000000,
+        uuid: 'fakeuuid',
+      }],
+      writer: {
+        pid: 1000000,
+        uuid: 'fakeuuid',
+      }
+    })
+    expect(b.checkSync('write')).toEqual({status: 'open'})
+  })
+
+  test('removes inactive readers and writers', async () => {
+    fs.outputJSONSync(path.join(f + '.lock'), {
+      version: '2.0.0',
+      readers: [{
+        pid: 1000000,
+        uuid: 'fakeuuid',
+      }],
+      writer: {
+        pid: 1000000,
+        uuid: 'fakeuuid',
+      }
+    })
+    expect(await b.check('write')).toEqual({status: 'open'})
   })
 })

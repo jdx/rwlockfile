@@ -197,7 +197,6 @@ export default class Lockfile {
         pid: process.pid,
         reason,
       },
-      { spaces: 2 },
     )
   }
 
@@ -210,7 +209,6 @@ export default class Lockfile {
         pid: process.pid,
         reason,
       },
-      { spaces: 2 },
     )
   }
 
