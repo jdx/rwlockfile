@@ -48,7 +48,11 @@ describe('rwlockfile', () => {
 
   test('cannot get a write lock when reader lock', async () => {
     expect.assertions(2)
+    await a.remove('read')
+    a.removeSync('read')
     await a.add('read')
+    await a.add('read')
+    await a.remove('read')
     try {
       await b.add('write')
     } catch (err) {
