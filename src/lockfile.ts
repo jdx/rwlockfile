@@ -7,8 +7,6 @@ import { onceAtATime } from './decorators'
 
 const version = require('../package.json').version
 
-jest.setTimeout(100)
-
 export interface LockfileOptions {
   debug?: IDebug
 }
