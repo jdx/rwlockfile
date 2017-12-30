@@ -124,6 +124,7 @@ describe('lockfile', () => {
     constructor(lockfilePath: string) {
       this.mylock = new Lockfile(lockfilePath, {
         debug: require('debug')('lockfile'),
+        retryInterval: 1,
       })
     }
 
@@ -182,6 +183,8 @@ describe('rwlockfile', () => {
     constructor(lockfilePath: string) {
       this.mylock = new RWLockfile(lockfilePath, {
         debug: require('debug')('lockfile'),
+        timeout: 30,
+        retryInterval: 1,
       })
     }
 

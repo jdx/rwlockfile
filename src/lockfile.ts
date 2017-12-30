@@ -9,6 +9,8 @@ const version = require('../package.json').version
 
 export interface LockfileOptions {
   debug?: IDebug
+  timeout?: number
+  retryInterval?: number
 }
 
 interface LockInfoJSON {
@@ -28,6 +30,7 @@ export interface LockOptions {
 export default class Lockfile {
   public base: string
   public timeout = 30000
+  public retryInterval = 10
   public stale = 10000
   public uuid: string
   private fs: typeof FS
@@ -39,6 +42,8 @@ export default class Lockfile {
    * creates a new simple lockfile without read/write support
    */
   constructor(base: string, options: LockfileOptions = {}) {
+    this.timeout = options.timeout || this.timeout
+    this.retryInterval = options.retryInterval || this.retryInterval
     this.base = base
     this._debug = options.debug as any
     this.fs = require('fs-extra')
@@ -235,7 +240,7 @@ export default class Lockfile {
   private async _add(opts: Partial<LockOptions>) {
     await this._lock({
       timeout: this.timeout,
-      retryInterval: 10,
+      retryInterval: this.retryInterval,
       ifLocked: ({ reason: _ }) => {},
       ...opts,
     })

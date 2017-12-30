@@ -24,8 +24,8 @@ describe('rwlockfile', () => {
   let a: RWLockfile
   let b: RWLockfile
   beforeEach(() => {
-    a = new RWLockfile(f, { debug: debug('lock:a'), timeout: 20, retryInterval: 5 })
-    b = new RWLockfile(f, { debug: debug('lock:b'), timeout: 20, retryInterval: 5 })
+    a = new RWLockfile(f, { debug: debug('lock:a'), timeout: 10, retryInterval: 1 })
+    b = new RWLockfile(f, { debug: debug('lock:b'), timeout: 10, retryInterval: 1 })
   })
 
   test('can get a write lock', async () => {

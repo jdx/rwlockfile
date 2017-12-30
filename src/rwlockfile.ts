@@ -82,7 +82,7 @@ export class RWLockfile {
     this.uuid = require('uuid/v4')()
     this.fs = require('fs-extra')
     this.timeout = options.timeout || 30000
-    this.retryInterval = options.retryInterval || 1000
+    this.retryInterval = options.retryInterval || 10
     this.ifLocked = options.ifLocked || (() => {})
     instances.push(this)
     this.internal = new Lockfile(this.file, {
@@ -150,8 +150,8 @@ export class RWLockfile {
 
   unlockSync(type?: RWLockType): void {
     if (!type) {
-      this.unlockSync('read')
       this.unlockSync('write')
+      this.unlockSync('read')
       return
     }
     if (!this.count[type]) return
@@ -333,6 +333,7 @@ export class RWLockfile {
         const interval = random(opts.retryInterval / 2, opts.retryInterval * 2)
         await wait(interval)
         opts.timeout -= interval
+        opts.retryInterval *= 2
       }
     }
   }
