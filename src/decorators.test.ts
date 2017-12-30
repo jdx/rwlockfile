@@ -188,7 +188,7 @@ describe('rwlockfile', () => {
     @rwlockfile('mylock', 'write')
     async run(n: number) {
       this.info.push('start')
-      await wait(1)
+      await wait(10)
       this.info.push('done')
       return `n: ${n}`
     }

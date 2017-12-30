@@ -98,14 +98,14 @@ export class RWLockfile {
   }
 
   async add(type: RWLockType, opts: RWLockOptions = {}) {
-    this._debugReport('add', type)
+    this._debugReport('add', type, opts)
     if (!this.count[type]) await this._lock(type, opts)
     this._count[type]++
   }
 
-  addSync(type: RWLockType, { reason }: { reason?: string } = {}): void {
-    this._debugReport('addSync', type)
-    if (!this.count[type]) this._lockSync(type, reason)
+  addSync(type: RWLockType, opts: { reason?: string } = {}): void {
+    this._debugReport('addSync', type, opts)
+    if (!this.count[type]) this._lockSync(type, opts.reason)
     this._count[type]++
   }
 
@@ -144,7 +144,6 @@ export class RWLockfile {
       return
     }
     if (!this.count[type]) return
-    this._debugReport('unlock', type)
     await this._removeJob(type)
     this._count[type] = 0
   }
@@ -219,6 +218,7 @@ export class RWLockfile {
   }
 
   private _statusFromFile(type: RWLockType, f: RWLockfileJSON): Status {
+    if (type === 'read' && this.count.write) return { status: 'open', file: this.file }
     if (f.writer) return { status: 'write_lock', job: f.writer, file: this.file }
     if (type === 'write') {
       if (f.readers.length) return { status: 'read_lock', jobs: f.readers, file: this.file }
@@ -350,7 +350,7 @@ export class RWLockfile {
     const status = await this.check(type)
     if (status.status !== 'open') {
       this.debug('status: %o', status)
-      throw new RWLockfileError(status, this.file)
+      throw new RWLockfileError(status)
     }
     let f = await this._fetchFile()
     this.addJob(type, reason, f)
@@ -362,7 +362,7 @@ export class RWLockfile {
     const status = this.checkSync(type)
     if (status.status !== 'open') {
       this.debug('status: %o', status)
-      throw new RWLockfileError(status, this.file)
+      throw new RWLockfileError(status)
     }
     let f = this._fetchFileSync()
     this.addJob(type, reason, f)
@@ -375,12 +375,14 @@ export class RWLockfile {
   private _debugReport(
     action: 'add' | 'addSync' | 'remove' | 'removeSync' | 'unlock' | 'unlockSync',
     type: RWLockType,
+    {reason}: {reason?: string} = {}
   ): void {
     const operator =
       (action.startsWith('unlock') && `-${this.count[type]}`) || (action.startsWith('remove') && '-1') || '+1'
     const read = this.count['read'] + (type === 'read' ? operator : '')
     const write = this.count['write'] + (type === 'write' ? operator : '')
-    this.debug(`${action}:${type} read:${read} write:${write} ${this.file}`)
+    reason = reason ? ` reason:${reason}` : ''
+    this.debug(`${action}:${type} read:${read}${reason} write:${write} ${this.file}`)
   }
 }
 

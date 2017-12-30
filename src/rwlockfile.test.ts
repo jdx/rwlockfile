@@ -103,6 +103,16 @@ describe('rwlockfile', () => {
     expect(() => a.addSync('write')).toThrowError(/read lock exists/)
   })
 
+  test('can get a read lock while has write lock', async () => {
+    await a.add('write')
+    await a.add('read')
+  })
+
+  test('can get a read lock while has write lock sync', () => {
+    a.addSync('write')
+    a.addSync('read')
+  })
+
   test('cannot get 2 write locks', async () => {
     await a.add('write')
     await expect(b.add('write')).rejects.toThrow(/write lock exists:/)
