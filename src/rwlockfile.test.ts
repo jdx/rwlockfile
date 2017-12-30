@@ -37,6 +37,40 @@ describe('lockfile', () => {
     b = new Lockfile(f, {debug: debug('lock:b')})
   })
 
+  describe('add', () => {
+    test('.lock() adds 1', async () => {
+      expect(a.count).toEqual(0)
+      await a.lock()
+      expect(a.count).toEqual(1)
+      await a.lock()
+      expect(a.count).toEqual(1)
+    })
+
+    test('.lockSync() adds 1', () => {
+      expect(a.count).toEqual(0)
+      a.lockSync()
+      expect(a.count).toEqual(1)
+      a.lockSync()
+      expect(a.count).toEqual(1)
+    })
+
+    test('.add() adds 1', async () => {
+      expect(a.count).toEqual(0)
+      await a.add()
+      expect(a.count).toEqual(1)
+      await a.add()
+      expect(a.count).toEqual(2)
+    })
+
+    test('.addSync() adds 1', async () => {
+      expect(a.count).toEqual(0)
+      a.addSync()
+      expect(a.count).toEqual(1)
+      a.addSync()
+      expect(a.count).toEqual(2)
+    })
+  })
+
   test('adding/removing works fine', async () => {
     a.addSync()
     await a.add()
