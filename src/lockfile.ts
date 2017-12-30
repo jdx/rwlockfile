@@ -1,9 +1,9 @@
 import * as FS from 'fs-extra'
-import {IDebug} from 'debug'
+import { IDebug } from 'debug'
 import * as path from 'path'
 
-import {LockfileError} from './errors'
-import {onceAtATime} from './decorators'
+import { LockfileError } from './errors'
+import { onceAtATime } from './decorators'
 
 const version = require('../package.json').version
 
@@ -22,7 +22,7 @@ interface LockInfoJSON {
 
 export interface LockOptions {
   reason?: string
-  ifLocked: ({reason}: {reason?: string}) => (Promise<void> | void)
+  ifLocked: ({ reason }: { reason?: string }) => Promise<void> | void
   timeout: number
   retryInterval: number
 }
@@ -40,7 +40,7 @@ export default class Lockfile {
   /**
    * creates a new simple lockfile without read/write support
    */
-  constructor (base: string, options: LockfileOptions = {}) {
+  constructor(base: string, options: LockfileOptions = {}) {
     this.base = base
     this._debug = options.debug as any
     this.fs = require('fs-extra')
@@ -48,14 +48,18 @@ export default class Lockfile {
     instances.push(this)
   }
 
-  get count(): number { return this._count }
-  get dirPath() { return path.resolve(this.base + '.lock') }
+  get count(): number {
+    return this._count
+  }
+  get dirPath() {
+    return path.resolve(this.base + '.lock')
+  }
 
   /**
    * creates a lock
    * same as add
    */
-  lock (): Promise<void> {
+  lock(): Promise<void> {
     return this.add()
   }
 
@@ -63,7 +67,7 @@ export default class Lockfile {
    * creates a lock
    * same as add
    */
-  lockSync (): void {
+  lockSync(): void {
     this.addSync()
   }
 
@@ -71,7 +75,7 @@ export default class Lockfile {
    * removes all lock counts
    */
   @onceAtATime()
-  async unlock (): Promise<void> {
+  async unlock(): Promise<void> {
     if (!this.count) return
     this._debugReport('unlock')
     await this.fs.remove(this.dirPath)
@@ -82,7 +86,7 @@ export default class Lockfile {
   /**
    * removes all lock counts
    */
-  unlockSync (): void {
+  unlockSync(): void {
     if (!this.count) return
     this._debugReport('unlock')
     this.fs.removeSync(this.dirPath)
@@ -93,7 +97,7 @@ export default class Lockfile {
   /**
    * adds 1 lock count
    */
-  async add (opts: Partial<LockOptions> = {}): Promise<void> {
+  async add(opts: Partial<LockOptions> = {}): Promise<void> {
     this._debugReport('add')
     if (!this.count) await this._add(opts)
     this._count++
@@ -102,7 +106,7 @@ export default class Lockfile {
   /**
    * adds 1 lock count
    */
-  addSync (opts: {reason?: string} = {}): void {
+  addSync(opts: { reason?: string } = {}): void {
     this._debugReport('add')
     if (!this.count) this._lockSync(opts)
     this._count++
@@ -111,7 +115,7 @@ export default class Lockfile {
   /**
    * removes 1 lock count
    */
-  async remove (): Promise<void> {
+  async remove(): Promise<void> {
     this._debugReport('remove')
     switch (this.count) {
       case 0:
@@ -128,7 +132,7 @@ export default class Lockfile {
   /**
    * removes 1 lock count
    */
-  removeSync (): void {
+  removeSync(): void {
     switch (this.count) {
       case 0:
         break
@@ -146,7 +150,7 @@ export default class Lockfile {
    * returns true if it already has a lock
    */
   @onceAtATime()
-  async check (): Promise<boolean> {
+  async check(): Promise<boolean> {
     const mtime = await this.fetchMtime()
     const status = this._status(mtime)
     return ['open', 'have_lock', 'stale'].includes(status)
@@ -156,15 +160,17 @@ export default class Lockfile {
    * check if this instance can get a lock
    * returns true if it already has a lock
    */
-  checkSync (): boolean {
+  checkSync(): boolean {
     const mtime = this.fetchMtimeSync()
     const status = this._status(mtime)
     return ['open', 'have_lock', 'stale'].includes(status)
   }
 
-  private get _infoPath() { return path.resolve(this.dirPath + 'info.json') }
+  private get _infoPath() {
+    return path.resolve(this.dirPath + 'info.json')
+  }
 
-  private async fetchReason (): Promise<string | undefined> {
+  private async fetchReason(): Promise<string | undefined> {
     try {
       const b: LockInfoJSON = await this.fs.readJSON(this._infoPath)
       return b.reason
@@ -173,7 +179,7 @@ export default class Lockfile {
     }
   }
 
-  private fetchReasonSync (): string | undefined {
+  private fetchReasonSync(): string | undefined {
     try {
       const b: LockInfoJSON = this.fs.readJSONSync(this._infoPath)
       return b.reason
@@ -182,57 +188,65 @@ export default class Lockfile {
     }
   }
 
-  private async _saveReason (reason: string | undefined): Promise<void> {
-    await this.fs.writeJSON(this._infoPath, {
-      version,
-      uuid: this.uuid,
-      pid: process.pid,
-      reason,
-    }, {spaces: 2})
+  private async _saveReason(reason: string | undefined): Promise<void> {
+    await this.fs.writeJSON(
+      this._infoPath,
+      {
+        version,
+        uuid: this.uuid,
+        pid: process.pid,
+        reason,
+      },
+      { spaces: 2 },
+    )
   }
 
-  private _saveReasonSync (reason: string | undefined): void {
-    this.fs.writeJSONSync(this._infoPath, {
-      version,
-      uuid: this.uuid,
-      pid: process.pid,
-      reason,
-    }, {spaces: 2})
+  private _saveReasonSync(reason: string | undefined): void {
+    this.fs.writeJSONSync(
+      this._infoPath,
+      {
+        version,
+        uuid: this.uuid,
+        pid: process.pid,
+        reason,
+      },
+      { spaces: 2 },
+    )
   }
 
   private async fetchMtime(): Promise<Date | undefined> {
     try {
-      const {mtime} = await this.fs.stat(this.dirPath)
+      const { mtime } = await this.fs.stat(this.dirPath)
       return mtime
     } catch (err) {
       if (err.code !== 'ENOENT') throw err
     }
   }
 
-  private fetchMtimeSync (): Date | undefined {
+  private fetchMtimeSync(): Date | undefined {
     try {
-      const {mtime} = this.fs.statSync(this.dirPath)
+      const { mtime } = this.fs.statSync(this.dirPath)
       return mtime
     } catch (err) {
       if (err.code !== 'ENOENT') throw err
     }
   }
 
-  private isStale (mtime?: Date): boolean {
+  private isStale(mtime?: Date): boolean {
     if (!mtime) return true
     return mtime < new Date(Date.now() - this.stale)
   }
 
-  private debug (msg: string, ...args: any[]) {
+  private debug(msg: string, ...args: any[]) {
     if (this._debug) this._debug(msg, ...args)
   }
 
   @onceAtATime()
-  private async _add (opts: Partial<LockOptions>) {
+  private async _add(opts: Partial<LockOptions>) {
     await this._lock({
       timeout: this.timeout,
       retryInterval: 10,
-      ifLocked: ({reason: _}) => {},
+      ifLocked: ({ reason: _ }) => {},
       ...opts,
     })
     await this._saveReason(opts.reason)
@@ -252,10 +266,10 @@ export default class Lockfile {
       this.debug('waiting for lock', reason, this.dirPath)
 
       // run callback
-      await opts.ifLocked({reason})
+      await opts.ifLocked({ reason })
 
       // check if timed out
-      if (opts.timeout < 0) throw new LockfileError({reason, file: this.dirPath})
+      if (opts.timeout < 0) throw new LockfileError({ reason, file: this.dirPath })
 
       // check if stale
       const mtime = await this.fetchMtime()
@@ -274,16 +288,17 @@ export default class Lockfile {
       }
 
       // wait before retrying
-      const interval = random(opts.retryInterval/2, opts.retryInterval * 2)
+      const interval = random(opts.retryInterval / 2, opts.retryInterval * 2)
       await wait(interval)
-      return this._lock({...opts,
+      return this._lock({
+        ...opts,
         timeout: opts.timeout - interval,
         retryInterval: opts.retryInterval * 2,
       })
     }
   }
 
-  private _lockSync(opts: {reason?: string} = {}): void {
+  private _lockSync(opts: { reason?: string } = {}): void {
     this.debug('_lockSync', this.dirPath)
     this.fs.mkdirpSync(path.dirname(this.dirPath))
     try {
@@ -308,13 +323,13 @@ export default class Lockfile {
       }
 
       let reason = this.fetchReasonSync()
-      throw new LockfileError({reason, file: this.dirPath})
+      throw new LockfileError({ reason, file: this.dirPath })
     }
     this._saveReasonSync(opts.reason)
     this.startLocking()
   }
 
-  private _status (mtime: Date | undefined): 'locked' | 'stale' | 'open' | 'have_lock' {
+  private _status(mtime: Date | undefined): 'locked' | 'stale' | 'open' | 'have_lock' {
     if (this.count) return 'have_lock'
     if (!mtime) return 'open'
     const stale = this.isStale(mtime)
@@ -322,23 +337,22 @@ export default class Lockfile {
     return 'locked'
   }
 
-  private startLocking () {
+  private startLocking() {
     this.updater = setInterval(() => {
-      let now = Date.now()/1000
-      this.fs.utimes(this.dirPath, now, now)
-      .catch(err => {
+      let now = Date.now() / 1000
+      this.fs.utimes(this.dirPath, now, now).catch(err => {
         this.debug(err)
         this._stopLocking()
       })
     }, 1000)
   }
 
-  private _stopLocking (): void {
+  private _stopLocking(): void {
     clearInterval(this.updater)
     this._count = 0
   }
 
-  private _debugReport (action: 'add' | 'remove' | 'unlock') {
+  private _debugReport(action: 'add' | 'remove' | 'unlock') {
     this.debug(`${action} ${this.count} ${this.dirPath}`)
   }
 }
@@ -353,10 +367,10 @@ process.once('exit', () => {
   for (let i of instances) i.unlockSync()
 })
 
-function wait (ms: number) {
+function wait(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
-function random (min: number, max: number): number {
+function random(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min) + min)
 }

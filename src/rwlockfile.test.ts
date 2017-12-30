@@ -1,4 +1,4 @@
-import {RWLockfile, Lockfile} from './rwlockfile'
+import { RWLockfile, Lockfile } from './rwlockfile'
 import * as fs from 'fs-extra'
 import * as path from 'path'
 import * as tmp from 'tmp'
@@ -14,14 +14,14 @@ const flush = () => new Promise(resolve => setImmediate(resolve))
 
 beforeEach(() => {
   debug('lock:test')('beforeEach')
-  f = tmp.tmpNameSync({dir})
+  f = tmp.tmpNameSync({ dir })
 })
 
 afterAll(async () => {
   await fs.remove(path.join(__dirname, '../tmp'))
 })
 
-async function tick (until: Promise<any>) {
+async function tick(until: Promise<any>) {
   while (true) {
     const r = await Promise.race([flush(), until.then(() => true)])
     if (r) return until
@@ -33,8 +33,8 @@ describe('lockfile', () => {
   let a: Lockfile
   let b: Lockfile
   beforeEach(() => {
-    a = new Lockfile(f, {debug: debug('lock:a')})
-    b = new Lockfile(f, {debug: debug('lock:b')})
+    a = new Lockfile(f, { debug: debug('lock:a') })
+    b = new Lockfile(f, { debug: debug('lock:b') })
   })
 
   describe('add', () => {
@@ -90,12 +90,12 @@ describe('lockfile', () => {
   })
 
   test('errors on .lock() when locked', async () => {
-    await a.add({reason: 'a reason'})
+    await a.add({ reason: 'a reason' })
     await expect(tick(b.add())).rejects.toThrow(/^a reason:/)
   })
 
   test('errors on .lockSync() when locked sync', async () => {
-    a.addSync({reason: 'a reason'})
+    a.addSync({ reason: 'a reason' })
     await flush()
     jest.runOnlyPendingTimers()
     await flush()
@@ -105,7 +105,7 @@ describe('lockfile', () => {
 
   test('times out eventually', async () => {
     let run = async () => {
-      await a.add({reason: 'a reason'})
+      await a.add({ reason: 'a reason' })
       expect(await a.check()).toEqual(true)
       expect(a.checkSync()).toEqual(true)
       expect(await b.check()).toEqual(false)
@@ -143,42 +143,42 @@ describe('lockfile', () => {
 
   test('stale', async () => {
     fs.mkdirpSync(a.dirPath)
-    const now = Date.now()/1000
-    fs.utimesSync(a.dirPath, now, now-11)
+    const now = Date.now() / 1000
+    fs.utimesSync(a.dirPath, now, now - 11)
     await tick(a.lock())
   })
 
   test('stale sync', async () => {
-    const now = Date.now()/1000
+    const now = Date.now() / 1000
     fs.mkdirpSync(a.dirPath)
-    fs.utimesSync(a.dirPath, now, now-11)
+    fs.utimesSync(a.dirPath, now, now - 11)
     a.lockSync()
   })
 
   test('needs to be stale enough sync', async () => {
     fs.mkdirpSync(a.dirPath)
     expect(a.checkSync()).toEqual(false)
-    const now = Date.now()/1000
-    fs.utimesSync(a.dirPath, now, now-9)
+    const now = Date.now() / 1000
+    fs.utimesSync(a.dirPath, now, now - 9)
     expect(a.checkSync()).toEqual(false)
-    fs.utimesSync(a.dirPath, now, now-11)
+    fs.utimesSync(a.dirPath, now, now - 11)
     expect(a.checkSync()).toEqual(true)
   })
 
   test('needs to be stale enough', async () => {
     await fs.mkdirp(a.dirPath)
     expect(await a.check()).toEqual(false)
-    const now = Date.now()/1000
-    await fs.utimes(a.dirPath, now, now-9)
+    const now = Date.now() / 1000
+    await fs.utimes(a.dirPath, now, now - 9)
     expect(await a.check()).toEqual(false)
-    await fs.utimes(a.dirPath, now, now-11)
+    await fs.utimes(a.dirPath, now, now - 11)
     expect(await a.check()).toEqual(true)
   })
 
   test('updates lockfile time while locked', async () => {
-    const now = Date.now()/1000
+    const now = Date.now() / 1000
     await a.lock()
-    await fs.utimes(a.dirPath, now, now-20)
+    await fs.utimes(a.dirPath, now, now - 20)
     jest.runOnlyPendingTimers()
     expect(await b.check()).toEqual(false)
   })
@@ -188,8 +188,8 @@ describe('rwlockfile', () => {
   let a: RWLockfile
   let b: RWLockfile
   beforeEach(() => {
-    a = new RWLockfile(f, {debug: debug('lock:a')})
-    b = new RWLockfile(f, {debug: debug('lock:b')})
+    a = new RWLockfile(f, { debug: debug('lock:a') })
+    b = new RWLockfile(f, { debug: debug('lock:b') })
   })
 
   test('can get a write lock', async () => {

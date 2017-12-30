@@ -1,4 +1,4 @@
-import {onceAtATime} from './decorators'
+import { onceAtATime } from './decorators'
 
 describe('onceAtATime', () => {
   class MyClass {
