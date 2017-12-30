@@ -46,12 +46,24 @@ describe('rwlockfile', () => {
     b.addSync('read')
   })
 
-  test('ifLocked', async () => {
+  test('ifLocked on add', async () => {
     await a.add('write')
     const ifLocked = jest.fn()
     expect.assertions(1)
     try {
       await b.add('write', {ifLocked})
+    } catch (err) {
+      expect(ifLocked).toBeCalledWith()
+    }
+  })
+
+  test('ifLocked on constructor', async () => {
+    await a.add('write')
+    const ifLocked = jest.fn()
+    b = new RWLockfile(f, {timeout: 20, retryInterval: 5, ifLocked})
+    expect.assertions(1)
+    try {
+      await b.add('write')
     } catch (err) {
       expect(ifLocked).toBeCalledWith()
     }

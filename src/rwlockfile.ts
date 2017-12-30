@@ -35,6 +35,7 @@ export interface RWLockOptions {
 export interface RWLockfileOptions extends LockfileOptions {
   timeout?: number
   retryInterval?: number
+  ifLocked?: IfLockedFn
 }
 
 export type RWLockType = 'read' | 'write'
@@ -52,6 +53,10 @@ interface RWLockfileJSON {
   readers: Job[]
 }
 
+export interface IfLockedFn {
+  (): Promise<void> | void
+}
+
 export class RWLockfile {
   public base: string
   private _debug: any
@@ -62,6 +67,7 @@ export class RWLockfile {
   // @ts-ignore
   private internal: Lockfile
   private _count: { read: number; write: number } = { read: 0, write: 0 }
+  private ifLocked: IfLockedFn
 
   /**
    * creates a new read/write lockfile
@@ -74,6 +80,7 @@ export class RWLockfile {
     this.fs = require('fs-extra')
     this.timeout = options.timeout || 30000
     this.retryInterval = options.retryInterval || 1000
+    this.ifLocked = options.ifLocked || (() => {})
     instances.push(this)
     this.internal = new Lockfile(this.file, {
       debug: debugEnvVar() === 2 && this._debug,
@@ -317,7 +324,7 @@ export class RWLockfile {
   async _lock(type: RWLockType, opts: RWLockOptions): Promise<void> {
     opts.timeout = opts.timeout || this.timeout
     opts.retryInterval = opts.retryInterval || this.retryInterval
-    let ifLockedCb = once(opts.ifLocked || (() => {}))
+    let ifLockedCb = once(opts.ifLocked || this.ifLocked)
     while (true) {
       try {
         await this._tryLock(type, opts.reason)
