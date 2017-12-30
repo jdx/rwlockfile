@@ -49,12 +49,21 @@ describe('rwlockfile', () => {
   })
 
   test('cannot get a write lock when reader lock', async () => {
+    expect.assertions(2)
     await a.add('read')
-    await expect(b.add('write')).rejects.toThrowError(/^read lock exists/)
+    try {
+      await b.add('write')
+    } catch (err) {
+      await expect(err.message).toMatch(/^read lock exists/)
+    }
     await b.add('read', {reason: 'mylock'})
     await a.remove('read')
     await a.add('read')
-    await expect(a.add('write')).rejects.toThrowError(/^read lock exists: mylock/)
+    try {
+      await a.add('write')
+    } catch (err) {
+      await expect(err.message).toMatch(/^read lock exists: mylock/)
+    }
   })
 
   test('cannot get a write lock when reader lock sync', () => {
