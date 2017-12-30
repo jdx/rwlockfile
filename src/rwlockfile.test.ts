@@ -52,7 +52,9 @@ describe('rwlockfile', () => {
     a.removeSync('read')
     await a.add('read')
     await a.add('read')
+    a.addSync('read')
     await a.remove('read')
+    a.removeSync('read')
     try {
       await b.add('write')
     } catch (err) {
