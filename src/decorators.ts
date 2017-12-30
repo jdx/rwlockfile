@@ -64,11 +64,13 @@ export function rwlockfile (prop: string, type: 'read' | 'write') {
         throw new Error('prop does not point to a Lockfile instance')
       }
       await lockfile.add(type, {reason: name})
+      let result
       try {
-        return await originalMethod!.apply(this, args)
+        result = await originalMethod!.apply(this, args)
       } finally {
         await lockfile.remove(type)
       }
+      return result
     }
     if (descriptor.value) descriptor.value = fn
     else descriptor.get = fn

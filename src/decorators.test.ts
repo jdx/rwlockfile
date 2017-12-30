@@ -144,7 +144,7 @@ describe('lockfile', () => {
     b = new MyLockClass(lockfilePath)
   })
 
-  test.only('it locks', async () => {
+  test('it locks', async () => {
     let apromise = a.run(1)
     let bpromise = b.run(2)
     expect(await apromise).toEqual('n: 1')
