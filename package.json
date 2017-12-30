@@ -41,11 +41,11 @@
     "locking"
   ],
   "license": "ISC",
-  "main": "lib/rwlockfile.js",
+  "main": "lib/index.js",
   "repository": "jdxcode/rwlockfile",
   "scripts": {
     "prepare": "del-cli lib && tsc && del-cli lib/**/*.test.d.ts lib/**/*.test.js ",
-    "test": "jest"
+    "test": "jest --forceExit"
   },
   "types": "lib/index.d.ts"
 }
