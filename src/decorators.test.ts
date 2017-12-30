@@ -1,4 +1,10 @@
-import { onceAtATime } from './decorators'
+import * as path from 'path'
+import Lockfile from './lockfile'
+import { lockfile, onceAtATime } from './decorators'
+
+function wait(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
 
 describe('onceAtATime', () => {
   class MyClass {
@@ -90,5 +96,49 @@ describe('onceAtATime', () => {
       await a.b('2')
       expect(a.calls).toEqual(['1', '2'])
     })
+  })
+})
+
+describe('lockfile', () => {
+  let count = 0
+  let lockfilePath
+  class MyLockClass {
+    mylock: Lockfile
+    info: string[] = []
+
+    constructor (lockfilePath: string) {
+      this.mylock = new Lockfile(lockfilePath, {
+        debug: require('debug')('lockfile')
+      })
+    }
+
+    @lockfile('mylock')
+    async run(n: number) {
+      this.info.push('start')
+      await wait(1)
+      this.info.push('done')
+      return `n: ${n}`
+    }
+  }
+
+  let a: MyLockClass
+  let b: MyLockClass
+
+  beforeEach(() => {
+    count++
+    lockfilePath = path.join(__dirname, `../tmp/test/decorators/${count}`)
+    a = new MyLockClass(lockfilePath)
+    b = new MyLockClass(lockfilePath)
+  })
+
+  test('it locks', async () => {
+    let apromise = a.run(1)
+    let bpromise = b.run(2)
+    expect(await apromise).toEqual('n: 1')
+    expect(a.info).toEqual(['start', 'done'])
+    expect(b.info).toEqual([])
+    expect(await bpromise).toEqual('n: 2')
+    expect(a.info).toEqual(['start', 'done'])
+    expect(b.info).toEqual(['start', 'done'])
   })
 })

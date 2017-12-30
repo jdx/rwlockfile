@@ -2,7 +2,7 @@ import Lockfile from './lockfile'
 import * as fs from 'fs-extra'
 import * as path from 'path'
 
-const dir = path.join(__dirname, '../tmp/test')
+const dir = path.join(__dirname, '../tmp/test/lockfile')
 
 let count: number = 0
 let f: string
@@ -13,10 +13,10 @@ jest.useFakeTimers()
 const flush = () => new Promise(resolve => setImmediate(resolve))
 
 beforeEach(async () => {
-  count++
   debug('lock:test')('beforeEach')
   f = path.join(dir, count.toString())
   await fs.remove(path.join(__dirname, '../tmp'))
+  count++
 })
 
 async function tick(until: Promise<any>) {

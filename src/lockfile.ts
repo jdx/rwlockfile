@@ -98,7 +98,7 @@ export default class Lockfile {
    * adds 1 lock count
    */
   async add(opts: Partial<LockOptions> = {}): Promise<void> {
-    this._debugReport('add')
+    this._debugReport('add', opts.reason)
     if (!this.count) await this._add(opts)
     this._count++
   }
@@ -107,7 +107,7 @@ export default class Lockfile {
    * adds 1 lock count
    */
   addSync(opts: { reason?: string } = {}): void {
-    this._debugReport('add')
+    this._debugReport('add', opts.reason)
     if (!this.count) this._lockSync(opts)
     this._count++
   }
@@ -352,8 +352,8 @@ export default class Lockfile {
     this._count = 0
   }
 
-  private _debugReport(action: 'add' | 'remove' | 'unlock') {
-    this.debug(`${action} ${this.count} ${this.dirPath}`)
+  private _debugReport(action: 'add' | 'remove' | 'unlock', reason?: string) {
+    this.debug(`${action} ${this.count} ${reason ? `${reason} ` : ''}${this.dirPath}`)
   }
 }
 
