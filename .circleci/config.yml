@@ -14,6 +14,7 @@ jobs:
             - v0-yarn-{{ .Environment.CIRCLE_JOB }}-master
       - run: yarn
       - run: yarn test --coverage
+      - run: curl -s https://codecov.io/bash | bash
       - save_cache:
           key: v0-yarn-{{ .Environment.CIRCLE_JOB }}-{{ .Branch }}-{{checksum "yarn.lock"}}
           paths:
