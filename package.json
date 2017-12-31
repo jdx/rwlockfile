@@ -38,6 +38,7 @@
   "repository": "jdxcode/rwlockfile",
   "scripts": {
     "prepare": "del-cli lib && tsc && del-cli lib/**/*.test.d.ts lib/**/*.test.js ",
+    "pretest": "tsc",
     "test": "jest --forceExit"
   },
   "types": "lib/index.d.ts"

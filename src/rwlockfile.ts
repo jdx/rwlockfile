@@ -1,5 +1,5 @@
 import { spawn, spawnSync } from 'child_process'
-import { lockfile, lockfileSync, onceAtATime } from './decorators'
+import { lockfile, onceAtATime } from './decorators'
 import * as FS from 'fs-extra'
 import * as path from 'path'
 import Lockfile, { LockfileOptions } from './lockfile'
@@ -191,7 +191,7 @@ export class RWLockfile {
     } else throw new Error(`Unexpected status: ${status!.status}`)
   }
 
-  @lockfileSync('internal')
+  @lockfile('internal', {sync: true})
   checkSync(type: RWLockType): Status {
     const f = this._fetchFileSync()
     const status = this._statusFromFile(type, f)
@@ -303,7 +303,7 @@ export class RWLockfile {
     await this.writeFile(f)
   }
 
-  @lockfileSync('internal')
+  @lockfile('internal', {sync: true})
   private _removeJobSync(type: RWLockType): void {
     let f = this._fetchFileSync()
     this._removeJobFromFile(type, f)
@@ -350,7 +350,7 @@ export class RWLockfile {
     await this.writeFile(f)
   }
 
-  @lockfileSync('internal')
+  @lockfile('internal', {sync: true})
   private _lockSync(type: RWLockType, reason?: string): void {
     const status = this.checkSync(type)
     if (status.status !== 'open') {
