@@ -20,6 +20,3 @@ after_test:
       bash codecov.sh
 
 build: 'off'
-
-matrix:
-  fast_finish: true
