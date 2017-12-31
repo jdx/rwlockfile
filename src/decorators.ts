@@ -6,14 +6,14 @@ export interface LockfileOptions {
 }
 export function lockfile(prop: string, opts: LockfileOptions = {}) {
   const Lockfile = require('./lockfile').default
-  return methodDecorator(function ({original}) {
+  return methodDecorator(function ({original, propertyName}) {
     return function (this: any, ...args: any[]) {
       const lockfile: L.default = this[prop]
       if (!(lockfile instanceof Lockfile)) {
         throw new Error('prop does not point to a Lockfile instance')
       }
       if (opts.sync) {
-        lockfile.addSync({ reason: name })
+        lockfile.addSync({ reason: propertyName.toString() })
         try {
           return original.apply(this, args)
         } finally {
@@ -21,7 +21,7 @@ export function lockfile(prop: string, opts: LockfileOptions = {}) {
         }
       } else {
         return (async () => {
-          await lockfile.add({ reason: name })
+          await lockfile.add({ reason: propertyName.toString() })
           try {
             return await original.apply(this, args)
           } finally {
