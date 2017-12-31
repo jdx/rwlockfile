@@ -62,15 +62,15 @@ export interface IfLockedFn {
 
 export class RWLockfile {
   public base: string
+  public ifLocked: IfLockedFn
+  public timeout: number
+  public retryInterval: number
   private _debug: any
   private uuid: string
   private fs: typeof FS
-  private timeout: number
-  private retryInterval: number
   // @ts-ignore
   private internal: Lockfile
   private _count: { read: number; write: number } = { read: 0, write: 0 }
-  private ifLocked: IfLockedFn
 
   /**
    * creates a new read/write lockfile
