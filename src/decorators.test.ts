@@ -2,6 +2,7 @@ import * as path from 'path'
 import Lockfile from './lockfile'
 import RWLockfile from './rwlockfile'
 import { rwlockfile, lockfile, onceAtATime } from './decorators'
+import * as _ from 'lodash'
 
 function wait(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms))
@@ -154,23 +155,23 @@ describe('lockfileSync', () => {
 })
 
 describe('rwlockfile', () => {
+  let runs: number[] = []
   class MyLockClass {
     mylock: RWLockfile
-    info: string[] = []
 
     constructor(lockfilePath: string) {
       this.mylock = new RWLockfile(lockfilePath, {
         debug: require('debug')('lockfile'),
-        timeout: 30,
+        timeout: 10,
         retryInterval: 1,
       })
     }
 
     @rwlockfile('mylock', 'write')
     async run(n: number) {
-      this.info.push('start')
-      await wait(10)
-      this.info.push('done')
+      runs.push(n)
+      await wait(1)
+      runs.push(n)
       return `n: ${n}`
     }
   }
@@ -184,20 +185,18 @@ describe('rwlockfile', () => {
   })
 
   test('it locks', async () => {
-    let apromise = a.run(1)
-    let bpromise = b.run(2)
-    expect(await apromise).toEqual('n: 1')
-    expect(a.info).toEqual(['start', 'done'])
-    expect(b.info).toEqual([])
-    expect(await bpromise).toEqual('n: 2')
-    expect(a.info).toEqual(['start', 'done'])
-    expect(b.info).toEqual(['start', 'done'])
+    a.run(1)
+    a.run(2)
+    b.run(3)
+    await b.run(4)
+    expect(runs.join('')).toEqual('21214343')
   })
 
   test('ifLocked', async () => {
+    let runIfLocked = jest.fn()
+    let owner: MyLockClass | undefined
     class MyLockClass {
       mylock: RWLockfile
-      info: string[] = []
 
       constructor(lockfilePath: string) {
         this.mylock = new RWLockfile(lockfilePath, {
@@ -207,20 +206,21 @@ describe('rwlockfile', () => {
 
       @rwlockfile('mylock', 'write', {ifLocked: 'runIfLocked'})
       async run() {
-        this.info.push('start')
-        await wait(20)
-        this.info.push('done')
+        if (owner && owner !== this) throw new Error('owner changed')
+        owner = this
+        await wait(_.random(0, 30))
+        if (owner && owner !== this) throw new Error('owner changed')
+        owner = undefined
       }
 
       protected runIfLocked () {
-        this.info.push('runIfLocked')
+        runIfLocked()
       }
     }
 
     let a = new MyLockClass(lockfilePath)
     let b = new MyLockClass(lockfilePath)
-    a.run()
-    await b.run()
-    expect(b.info).toEqual(['runIfLocked', 'start', 'done'])
+    await Promise.all(_.range(50).map(() => Promise.all(_.shuffle([a.run(), b.run()]))))
+    expect(runIfLocked.mock.calls.length).toEqual(1)
   })
 })
