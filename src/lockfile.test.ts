@@ -186,6 +186,7 @@ test('updates lockfile time while locked', async () => {
   await a.lock()
   await fs.utimes(a.dirPath, now, now - 100)
   expect(await b.check()).toEqual(true)
+  await flush()
   jest.runOnlyPendingTimers()
   await flush()
   expect(await b.check()).toEqual(false)

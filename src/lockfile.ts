@@ -254,7 +254,7 @@ export default class Lockfile {
     try {
       await this.fs.mkdir(this.dirPath)
     } catch (err) {
-      if (err.code !== 'EEXIST') throw err
+      if (!['EEXIST', 'EPERM'].includes(err.code)) throw err
 
       // grab reason
       const reason = await this.fetchReason()
@@ -299,7 +299,7 @@ export default class Lockfile {
     try {
       this.fs.mkdirSync(this.dirPath)
     } catch (err) {
-      if (err.code !== 'EEXIST') throw err
+      if (!['EEXIST', 'EPERM'].includes(err.code)) throw err
 
       // check if stale
       const mtime = this.fetchMtimeSync()
