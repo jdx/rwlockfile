@@ -39,14 +39,14 @@ export interface RWLockfileOptions {
 
 export function rwlockfile(prop: string, type: 'read' | 'write', opts: RWLockfileOptions = {}) {
   const RWLockfile = require('./rwlockfile').default
-  return methodDecorator<(...args: any[]) => Promise<any>>(function ({original}) {
+  return methodDecorator<(...args: any[]) => Promise<any>>(function ({original, propertyName}) {
     return async function (this: any, ...args: any[]) {
       const lockfile: RWL.default = this[prop]
       if (!(lockfile instanceof RWLockfile)) {
         throw new Error('prop does not point to a Lockfile instance')
       }
       const addOpts: RWL.RWLockOptions = {
-        reason: name
+        reason: propertyName.toString()
       }
       if (opts.ifLocked) {
         addOpts.ifLocked = () => this[opts.ifLocked as any]()
