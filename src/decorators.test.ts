@@ -110,6 +110,7 @@ describe('onceAtATime', () => {
 })
 
 describe('lockfile', () => {
+  let mutex: MyLockClass | undefined
   class MyLockClass {
     mylock: Lockfile
     info: string[] = []
@@ -117,79 +118,71 @@ describe('lockfile', () => {
     constructor(lockfilePath: string) {
       this.mylock = new Lockfile(lockfilePath, {
         debug: require('debug')('lockfile'),
-        timeout: 10,
+        timeout: 10000,
         retryInterval: 1,
       })
     }
 
     @lockfile('mylock')
-    async run(n: number) {
-      this.info.push('start')
+    async run(n: number = 2) {
+      if (mutex && mutex !== this) throw new Error('owner changed')
+      mutex = this
       await wait(1)
-      this.info.push('done')
+      if (mutex && mutex !== this) throw new Error('owner changed')
+      mutex = undefined
       return `n: ${n}`
     }
   }
 
-  let a: MyLockClass
-  let b: MyLockClass
+  let instances: MyLockClass[]
 
   beforeEach(() => {
-    a = new MyLockClass(lockfilePath)
-    b = new MyLockClass(lockfilePath)
+    instances = _.range(5).map(() => new MyLockClass(lockfilePath))
   })
 
   test('it locks', async () => {
-    let apromise = a.run(1)
-    let bpromise = b.run(2)
-    expect(await apromise).toEqual('n: 1')
-    expect(a.info).toEqual(['start', 'done'])
-    expect(b.info).toEqual([])
-    expect(await bpromise).toEqual('n: 2')
-    expect(a.info).toEqual(['start', 'done'])
-    expect(b.info).toEqual(['start', 'done'])
+    await Promise.all(instances.map(i => Promise.all([i.run(), i.run()])))
+  })
+
+  test('returns the value', async () => {
+    let a = new MyLockClass(lockfilePath)
+    let r = await a.run(1)
+    expect(r).toEqual('n: 1')
   })
 })
 
-describe('lockfileSync', () => {
-})
-
 describe('rwlockfile', () => {
-  let runs: number[] = []
+  let mutex: MyLockClass | undefined
   class MyLockClass {
     mylock: RWLockfile
 
     constructor(lockfilePath: string) {
       this.mylock = new RWLockfile(lockfilePath, {
         debug: require('debug')('lockfile'),
-        timeout: 10,
+        timeout: 10000,
         retryInterval: 1,
       })
     }
 
     @rwlockfile('mylock', 'write')
     async run(n: number) {
-      runs.push(n)
+      if (mutex && mutex !== this) throw new Error('owner changed')
+      mutex = this
       await wait(1)
-      runs.push(n)
+      if (mutex && mutex !== this) throw new Error('owner changed')
+      mutex = undefined
       return `n: ${n}`
     }
   }
 
-  let a: MyLockClass
-  let b: MyLockClass
-
-  beforeEach(() => {
-    a = new MyLockClass(lockfilePath)
-    b = new MyLockClass(lockfilePath)
+  test('returns value', async () => {
+    let a = new MyLockClass(lockfilePath)
+    expect(await a.run(1)).toEqual('n: 1')
   })
 
   test('it locks', async () => {
-    a.run(1)
-    a.run(2)
-    b.run(3)
-    await b.run(4)
-    expect(runs.join('')).toEqual('21214343')
+    let instances = _.range(5).map(() => new MyLockClass(lockfilePath))
+    await Promise.all(instances.map(i => Promise.all([i.run(2), i.run(1)])))
   })
 
   test('ifLocked', async () => {
