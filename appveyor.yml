@@ -1,4 +1,9 @@
 ---
+environment:
+  matrix:
+    - nodejs_version: 9
+    - nodejs_version: 8
+    - nodejs_version: 6
 cache:
   - "%LOCALAPPDATA%\\Yarn"
 install:
@@ -12,10 +17,7 @@ after_test:
       Invoke-WebRequest -Uri 'https://codecov.io/bash' -OutFile codecov.sh
       bash codecov.sh
 
-matrix:
-  environment:
-    - nodejs_version: 9
-    - nodejs_version: 8
-    - nodejs_version: 6
-
 build: 'off'
+
+matrix:
+  fast_finish: true
