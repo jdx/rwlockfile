@@ -218,6 +218,7 @@ export class RWLockfile {
   }
 
   private _statusFromFile(type: RWLockType, f: RWLockfileJSON): Status {
+    if (type === 'write' && this.count.write) return { status: 'open', file: this.file }
     if (type === 'read' && this.count.write) return { status: 'open', file: this.file }
     if (f.writer) return { status: 'write_lock', job: f.writer, file: this.file }
     if (type === 'write') {
