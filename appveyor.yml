@@ -8,6 +8,7 @@ cache:
   - "%LOCALAPPDATA%\\Yarn"
   - "node_modules"
 install:
+  - rd /s /q "%LOCALAPPDATA%\\Yarn"
   - ps: Install-Product node $env:nodejs_version x64
   - yarn
 test_script:
