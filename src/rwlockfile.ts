@@ -406,7 +406,7 @@ process.once('exit', () => {
 })
 
 function debugEnvVar(): number {
-  return (process.env.RWLOCKFILE_DEBUG === '1' && 1) || (process.env.RWLOCKFILE_DEBUG === '2' && 2) || 0
+  return ((process.env.RWLOCKFILE_DEBUG === '1' || process.env.HEROKU_DEBUG_ALL) && 1) || (process.env.RWLOCKFILE_DEBUG === '2' && 2) || 0
 }
 
 function pidActiveSync(pid: number): boolean {
