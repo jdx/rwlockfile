@@ -402,7 +402,11 @@ export class RWLockfile {
 
 const instances: RWLockfile[] = []
 process.once('exit', () => {
-  for (let i of instances) i.unlockSync()
+  for (let i of instances) {
+    try {
+      i.unlockSync()
+    } catch (err) {}
+  }
 })
 
 function debugEnvVar(): number {

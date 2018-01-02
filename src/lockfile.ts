@@ -366,7 +366,11 @@ export interface RWLockfileOptions {
 
 const instances: Lockfile[] = []
 process.once('exit', () => {
-  for (let i of instances) i.unlockSync()
+  for (let i of instances) {
+    try {
+      i.unlockSync()
+    } catch (err) {}
+  }
 })
 
 function wait(ms: number) {
