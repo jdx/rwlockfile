@@ -301,7 +301,7 @@ export default class Lockfile {
     }
   }
 
-  private _lockSync(opts: { reason?: string } = {}): void {
+  private _lockSync({reason, retries = 20}: { reason?: string, retries?: number } = {}): void {
     this.debug('_lockSync', this.dirPath)
     this.fs.mkdirpSync(path.dirname(this.dirPath))
     try {
@@ -313,23 +313,21 @@ export default class Lockfile {
       const mtime = this.fetchMtimeSync()
       const status = this._status(mtime)
 
-      switch (status) {
-        case 'stale':
-          try {
-            this.fs.rmdirSync(this.dirPath)
-          } catch (err) {
-            if (err.code !== 'ENOENT') throw err
-          }
-          return this._lockSync(opts)
-        case 'open':
-        case 'have_lock':
-          return this._lockSync(opts)
+      if (retries <= 0) {
+        let reason = this.fetchReasonSync()
+        throw new LockfileError({ reason, file: this.dirPath })
       }
 
-      let reason = this.fetchReasonSync()
-      throw new LockfileError({ reason, file: this.dirPath })
+      if (status === 'stale') {
+        try {
+          this.fs.rmdirSync(this.dirPath)
+        } catch (err) {
+          if (!['EPERM', 'ENOENT'].includes(err.code)) throw err
+        }
+      }
+      return this._lockSync({reason, retries: retries - 1})
     }
-    this._saveReasonSync(opts.reason)
+    this._saveReasonSync(reason)
     this.startLocking()
   }
 
