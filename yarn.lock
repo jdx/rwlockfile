@@ -1472,6 +1472,10 @@ is-primitive@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/is-primitive/-/is-primitive-2.0.0.tgz#207bab91638499c07b2adf240a41a87210034575"
 
+is-process-active@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/is-process-active/-/is-process-active-1.0.0.tgz#d21529792e950d1120369442867e0d7608ca2aac"
+
 is-redirect@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/is-redirect/-/is-redirect-1.0.0.tgz#1d03dded53bd8db0f30c26e4f95d36fc7c87dc24"

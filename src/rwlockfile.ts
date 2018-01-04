@@ -1,9 +1,9 @@
-import { spawn, spawnSync } from 'child_process'
 import { lockfile, onceAtATime } from './decorators'
 import * as FS from 'fs-extra'
 import * as path from 'path'
 import Lockfile, { LockfileOptions } from './lockfile'
 import { RWLockfileError } from './errors'
+import { isActive, isActiveSync } from 'is-process-active'
 
 const version = require('../package.json').version
 
@@ -166,7 +166,7 @@ export class RWLockfile {
     const status = this._statusFromFile(type, f)
     if (status.status === 'open') return status
     else if (status.status === 'write_lock') {
-      if (!await pidActive(status.job.pid)) {
+      if (!await isActive(status.job.pid)) {
         this.debug(`removing inactive write pid: ${status.job.pid}`)
         delete f.writer
         await this.writeFile(f)
@@ -176,7 +176,7 @@ export class RWLockfile {
     } else if (status.status === 'read_lock') {
       const pids = await Promise.all(
         status.jobs.map(async j => {
-          if (!await pidActive(j.pid)) return j.pid
+          if (!await isActive(j.pid)) return j.pid
         }),
       )
       const inactive = pids.filter(p => !!p)
@@ -197,7 +197,7 @@ export class RWLockfile {
     const status = this._statusFromFile(type, f)
     if (status.status === 'open') return status
     else if (status.status === 'write_lock') {
-      if (!pidActiveSync(status.job.pid)) {
+      if (!isActiveSync(status.job.pid)) {
         this.debug(`removing inactive writer pid: ${status.job.pid}`)
         delete f.writer
         this.writeFileSync(f)
@@ -205,7 +205,7 @@ export class RWLockfile {
       }
       return status
     } else if (status.status === 'read_lock') {
-      const inactive = status.jobs.map(j => j.pid).filter(pid => !pidActiveSync(pid))
+      const inactive = status.jobs.map(j => j.pid).filter(pid => !isActiveSync(pid))
       if (inactive.length) {
         this.debug(`removing inactive reader pids: ${inactive}`)
         f.readers = f.readers.filter(j => !inactive.includes(j.pid))
@@ -410,47 +410,11 @@ process.once('exit', () => {
 })
 
 function debugEnvVar(): number {
-  return ((process.env.RWLOCKFILE_DEBUG === '1' || process.env.HEROKU_DEBUG_ALL) && 1) || (process.env.RWLOCKFILE_DEBUG === '2' && 2) || 0
-}
-
-function pidActiveSync(pid: number): boolean {
-  if (!pid || isNaN(pid)) return false
-  return process.platform === 'win32' ? pidActiveWindowsSync(pid) : pidActiveUnix(pid)
-}
-
-async function pidActive(pid: number): Promise<boolean> {
-  if (!pid || isNaN(pid)) return false
-  return process.platform === 'win32' ? pidActiveWindows(pid) : pidActiveUnix(pid)
-}
-
-function pidActiveWindows(pid: number): Promise<boolean> {
-  return new Promise((resolve, reject) => {
-    const p = spawn('tasklist', ['/fi', `PID eq ${pid}`])
-    p.on('close', code => {
-      if (code !== 0) reject(new Error(`tasklist exited with code ${code}`))
-    })
-    p.stdout.on('data', (stdout: string) => {
-      resolve(!stdout.includes('No tasks are running'))
-    })
-  })
-}
-
-function pidActiveWindowsSync(pid: number): boolean {
-  const { stdout, error, status } = spawnSync('tasklist', ['/fi', `PID eq ${pid}`], {
-    stdio: [0, null, 2],
-    encoding: 'utf8',
-  })
-  if (error) throw error
-  if (status !== 0) throw new Error(`tasklist exited with code ${status}`)
-  return !stdout.includes('No tasks are running')
-}
-
-function pidActiveUnix(pid: number): boolean {
-  try {
-    return !!process.kill(pid, 0)
-  } catch (e) {
-    return e.code === 'EPERM'
-  }
+  return (
+    ((process.env.RWLOCKFILE_DEBUG === '1' || process.env.HEROKU_DEBUG_ALL) && 1) ||
+    (process.env.RWLOCKFILE_DEBUG === '2' && 2) ||
+    0
+  )
 }
 
 function wait(ms: number) {
