@@ -51,7 +51,7 @@ describe('rwlockfile', () => {
     const ifLocked = jest.fn()
     expect.assertions(1)
     try {
-      await b.add('write', {ifLocked})
+      await b.add('write', { ifLocked })
     } catch (err) {
       expect(ifLocked).toBeCalled()
     }
@@ -60,7 +60,7 @@ describe('rwlockfile', () => {
   test('ifLocked on constructor', async () => {
     await a.add('write')
     const ifLocked = jest.fn()
-    b = new RWLockfile(f, {timeout: 20, retryInterval: 5, ifLocked})
+    b = new RWLockfile(f, { timeout: 20, retryInterval: 5, ifLocked })
     expect.assertions(1)
     try {
       await b.add('write')

@@ -301,7 +301,7 @@ export default class Lockfile {
     }
   }
 
-  private _lockSync({reason, retries = 20}: { reason?: string, retries?: number } = {}): void {
+  private _lockSync({ reason, retries = 20 }: { reason?: string; retries?: number } = {}): void {
     this.debug('_lockSync', this.dirPath)
     this.fs.mkdirpSync(path.dirname(this.dirPath))
     try {
@@ -325,7 +325,7 @@ export default class Lockfile {
           if (!['EPERM', 'ENOENT'].includes(err.code)) throw err
         }
       }
-      return this._lockSync({reason, retries: retries - 1})
+      return this._lockSync({ reason, retries: retries - 1 })
     }
     this._saveReasonSync(reason)
     this.startLocking()

@@ -4,8 +4,8 @@ module.exports = {
   testMatch: ['**/*.test.ts'],
   globals: {
     'ts-jest': {
-      skipBabel: true
-    }
+      skipBabel: true,
+    },
   },
   transform: {
     '^.+\\.ts$': '<rootDir>/node_modules/ts-jest/preprocessor.js',

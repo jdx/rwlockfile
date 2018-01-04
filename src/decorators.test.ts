@@ -197,7 +197,7 @@ describe('rwlockfile', () => {
         })
       }
 
-      @rwlockfile('mylock', 'write', {ifLocked: 'runIfLocked'})
+      @rwlockfile('mylock', 'write', { ifLocked: 'runIfLocked' })
       async run() {
         if (owner && owner !== this) throw new Error('owner changed')
         owner = this
@@ -206,7 +206,7 @@ describe('rwlockfile', () => {
         owner = undefined
       }
 
-      protected runIfLocked () {
+      protected runIfLocked() {
         runIfLocked()
       }
     }

@@ -57,7 +57,7 @@ interface RWLockfileJSON {
 }
 
 export interface IfLockedFn {
-  ({status}: {status: Status}): Promise<void> | void
+  ({ status }: { status: Status }): Promise<void> | void
 }
 
 export class RWLockfile {
@@ -191,7 +191,7 @@ export class RWLockfile {
     } else throw new Error(`Unexpected status: ${status!.status}`)
   }
 
-  @lockfile('internal', {sync: true})
+  @lockfile('internal', { sync: true })
   checkSync(type: RWLockType): Status {
     const f = this._fetchFileSync()
     const status = this._statusFromFile(type, f)
@@ -304,7 +304,7 @@ export class RWLockfile {
     await this.writeFile(f)
   }
 
-  @lockfile('internal', {sync: true})
+  @lockfile('internal', { sync: true })
   private _removeJobSync(type: RWLockType): void {
     let f = this._fetchFileSync()
     this._removeJobFromFile(type, f)
@@ -351,7 +351,7 @@ export class RWLockfile {
     await this.writeFile(f)
   }
 
-  @lockfile('internal', {sync: true})
+  @lockfile('internal', { sync: true })
   private _lockSync(type: RWLockType, reason?: string): void {
     const status = this.checkSync(type)
     if (status.status !== 'open') {
@@ -389,7 +389,7 @@ export class RWLockfile {
   private _debugReport(
     action: 'add' | 'addSync' | 'remove' | 'removeSync' | 'unlock' | 'unlockSync',
     type: RWLockType,
-    {reason}: {reason?: string} = {}
+    { reason }: { reason?: string } = {},
   ): void {
     const operator =
       (action.startsWith('unlock') && `-${this.count[type]}`) || (action.startsWith('remove') && '-1') || '+1'
