@@ -1,9 +1,10 @@
+import cli from 'cli-ux'
 import { lockfile, onceAtATime } from './decorators'
 import * as FS from 'fs-extra'
 import * as path from 'path'
 import Lockfile, { LockfileOptions } from './lockfile'
 import { RWLockfileError } from './errors'
-import { isActive, isActiveSync } from 'is-process-active'
+import * as isProcessActive from 'is-process-active'
 
 const version = require('../package.json').version
 
@@ -432,6 +433,23 @@ function once<T extends (...args: any[]) => any>(fn: T): T {
     ran = true
     return fn(...args)
   }) as any
+}
+
+async function isActive (pid: number) {
+  try {
+    return await isProcessActive.isActive(pid)
+  } catch (err) {
+    cli.warn(err)
+    return false
+  }
+}
+function isActiveSync (pid: number) {
+  try {
+    return isProcessActive.isActiveSync(pid)
+  } catch (err) {
+    cli.warn(err)
+    return false
+  }
 }
 
 export default RWLockfile
