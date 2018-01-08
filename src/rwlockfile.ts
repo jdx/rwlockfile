@@ -317,13 +317,13 @@ export class RWLockfile {
   }
 
   @onceAtATime(1)
-  async _lock(type: RWLockType, opts: RWLockOptions): Promise<void> {
+  private async _lock(type: RWLockType, opts: RWLockOptions): Promise<void> {
     opts.timeout = opts.timeout || this.timeout
     opts.retryInterval = opts.retryInterval || this.retryInterval
     let ifLockedCb = once<IfLockedFn>(opts.ifLocked || this.ifLocked)
     while (true) {
       try {
-        await this._tryLock(type, opts.reason)
+        await this.tryLock(type, opts.reason)
         return
       } catch (err) {
         if (err.code !== 'ELOCK') throw err
@@ -340,7 +340,7 @@ export class RWLockfile {
   }
 
   @lockfile('internal')
-  async _tryLock(type: RWLockType, reason?: string): Promise<void> {
+  async tryLock(type: RWLockType, reason?: string): Promise<void> {
     const status = await this.check(type)
     if (status.status !== 'open') {
       this.debug('status: %o', status)
