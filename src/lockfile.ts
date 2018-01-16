@@ -1,5 +1,4 @@
 import * as FS from 'fs-extra'
-import { IDebug } from 'debug'
 import * as path from 'path'
 
 import { LockfileError } from './errors'
@@ -8,7 +7,7 @@ import { onceAtATime } from './decorators'
 const version = require('../package.json').version
 
 export interface LockfileOptions {
-  debug?: IDebug
+  debug?: any
   timeout?: number
   retryInterval?: number
 }
@@ -360,7 +359,7 @@ export default class Lockfile {
 }
 
 export interface RWLockfileOptions {
-  debug?: IDebug
+  debug?: any
   file?: string
 }
 

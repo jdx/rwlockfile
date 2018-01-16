@@ -435,7 +435,7 @@ function once<T extends (...args: any[]) => any>(fn: T): T {
   }) as any
 }
 
-async function isActive (pid: number) {
+async function isActive(pid: number) {
   try {
     return await isProcessActive.isActive(pid)
   } catch (err) {
@@ -443,7 +443,7 @@ async function isActive (pid: number) {
     return false
   }
 }
-function isActiveSync (pid: number) {
+function isActiveSync(pid: number) {
   try {
     return isProcessActive.isActiveSync(pid)
   } catch (err) {
