@@ -1,4 +1,3 @@
-import cli from 'cli-ux'
 import { lockfile, onceAtATime } from './decorators'
 import * as FS from 'fs-extra'
 import * as path from 'path'
@@ -439,7 +438,7 @@ async function isActive(pid: number) {
   try {
     return await isProcessActive.isActive(pid)
   } catch (err) {
-    cli.warn(err)
+    console.error(err)
     return false
   }
 }
@@ -447,7 +446,7 @@ function isActiveSync(pid: number) {
   try {
     return isProcessActive.isActiveSync(pid)
   } catch (err) {
-    cli.warn(err)
+    console.error(err)
     return false
   }
 }
