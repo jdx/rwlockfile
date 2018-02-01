@@ -23,10 +23,6 @@ jobs:
     <<: *test-build
     docker:
       - image: node:8
-  node-6:
-    <<: *test-build
-    docker:
-      - image: node:6
 
 workflows:
   version: 2
@@ -34,4 +30,3 @@ workflows:
     jobs:
       - node-latest
       - node-8
-      - node-6
