@@ -339,7 +339,7 @@ export class RWLockfile {
   }
 
   @lockfile('internal')
-  async tryLock(type: RWLockType, reason?: string, inc = false): Promise<void> {
+  async tryLock(type: RWLockType, reason?: string, inc = true): Promise<void> {
     if (this.count[type]) {
       if (inc) this._count[type]++
       return
