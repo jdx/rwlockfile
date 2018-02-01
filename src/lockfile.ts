@@ -35,7 +35,7 @@ export default class Lockfile {
   private fs: typeof FS
   private _debug?: (msg: string, ...args: any[]) => {}
   private _count = 0
-  private updater: NodeJS.Timer
+  private updater?: NodeJS.Timer
 
   /**
    * creates a new simple lockfile without read/write support
@@ -349,7 +349,7 @@ export default class Lockfile {
   }
 
   private _stopLocking(): void {
-    clearInterval(this.updater)
+    if (this.updater) clearInterval(this.updater)
     this._count = 0
   }
 

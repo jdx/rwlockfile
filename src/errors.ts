@@ -2,12 +2,15 @@ import { Status } from './rwlockfile'
 
 export class LockfileError extends Error {
   code = 'ELOCK'
-  msg: string
   file: string
-  reason: string
+  msg: string | undefined
+  reason: string | undefined
 
   constructor({ msg, file, reason }: { file: string; msg?: string; reason?: string }) {
     super(msg || (reason ? `${reason}: ${file}` : `lock exists!: ${file}`))
+    this.file = file
+    this.msg = msg
+    this.reason = reason
   }
 }
 

@@ -99,14 +99,13 @@ export class RWLockfile {
 
   async add(type: RWLockType, opts: RWLockOptions = {}) {
     this._debugReport('add', type, opts)
-    if (!this.count[type]) await this._lock(type, opts)
+    if (!this._count[type]) await this._lock(type, opts)
     this._count[type]++
   }
 
   addSync(type: RWLockType, opts: { reason?: string } = {}): void {
     this._debugReport('addSync', type, opts)
-    if (!this.count[type]) this._lockSync(type, opts.reason)
-    this._count[type]++
+    this._lockSync(type, opts.reason)
   }
 
   async remove(type: RWLockType): Promise<void> {
@@ -316,14 +315,14 @@ export class RWLockfile {
     else if (f.writer && f.writer.uuid === this.uuid) delete f.writer
   }
 
-  @onceAtATime(1)
+  @onceAtATime(0)
   private async _lock(type: RWLockType, opts: RWLockOptions): Promise<void> {
     opts.timeout = opts.timeout || this.timeout
     opts.retryInterval = opts.retryInterval || this.retryInterval
     let ifLockedCb = once<IfLockedFn>(opts.ifLocked || this.ifLocked)
     while (true) {
       try {
-        await this.tryLock(type, opts.reason)
+        await this.tryLock(type, opts.reason, false)
         return
       } catch (err) {
         if (err.code !== 'ELOCK') throw err
@@ -340,7 +339,12 @@ export class RWLockfile {
   }
 
   @lockfile('internal')
-  async tryLock(type: RWLockType, reason?: string): Promise<void> {
+  async tryLock(type: RWLockType, reason?: string, inc = false): Promise<void> {
+    if (this.count[type]) {
+      if (inc) this._count[type]++
+      return
+    }
+    this.debug('tryLock', type, reason)
     const status = await this.check(type)
     if (status.status !== 'open') {
       this.debug('status: %o', status)
@@ -349,10 +353,16 @@ export class RWLockfile {
     let f = await this._fetchFile()
     this.addJob(type, reason, f)
     await this.writeFile(f)
+    if (inc) this._count[type]++
+    this.debug('got %s lock for %s', type, reason)
   }
 
   @lockfile('internal', { sync: true })
   private _lockSync(type: RWLockType, reason?: string): void {
+    if (this._count[type]) {
+      this._count[type]++
+      return
+    }
     const status = this.checkSync(type)
     if (status.status !== 'open') {
       this.debug('status: %o', status)
@@ -361,6 +371,8 @@ export class RWLockfile {
     let f = this._fetchFileSync()
     this.addJob(type, reason, f)
     this.writeFileSync(f)
+    this._count[type]++
+    this.debug('got %s lock for %s', type, reason)
   }
 
   private async writeFile(f: RWLockfileJSON): Promise<void> {
