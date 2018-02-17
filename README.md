@@ -32,15 +32,49 @@ let lock = new RWLockfile('myfile', {
   retryInterval: 10,
 })
 
-// add a reader async or synchronously. If the count is >= 1 it creates a read lock
+// add a reader async or synchronously. If the count is >= 1 it creates a read lock (see note below)
 await lock.add('read')
 lock.addSync('read')
 
 // remove a reader async or synchronously. If the count == 0 it creates removes the read lock
-lock.remove('read')
+await lock.remove('read')
 lock.removeSync('read')
 
 // add a writer async or synchronously
-lock.add('write')
+await lock.add('write')
 lock.addSync('write')
 ```
+
+Behavior Note
+=============
+
+The use of `.add()` and `.remove()` may be a bit misleading but allow to attempt to explain what it means. It's designed to make it easy to add try/finally steps around locking. Each instance of RWLockfile has a count of readers and writers. The file itself has it's own count of readers and writers. When you increment the count, what you're doing is adding to the count of *just* that instance.
+
+In other words, you can do `lock.add('write')` multiple times on the same instance. That instance will create the write lock if the count is greater than 1 but no other instances will be allowed to increase the count above 0.
+
+Why? Because this way you can have functions in your code like this:
+
+```js
+async function doAThing() {
+  await lock.add('write')
+  try {
+    // do something while locked
+    doAnotherThing()
+  } finally {
+    await lock.remove('write')
+  }
+}
+
+async function doAnotherThing() {
+  await lock.add('write')
+  try {
+    // do something else while locked
+  } finally {
+    await lock.remove('write')
+  }
+}
+```
+
+This will only create a single write lock which will be removed after doAThing() is done. This way you can call doAnotherThing() and it ensures it has a lock if it doesn't exist, but will only remove the write lock if nothing it's using also has a write lock.
+
+I've found this behavior to be perfect for working with, but this sort of nesting lock logic is a little difficult to explain.
