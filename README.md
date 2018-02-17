@@ -48,7 +48,7 @@ lock.addSync('write')
 Behavior Note
 =============
 
-The use of `.add()` and `.remove()` may be a bit misleading but allow to attempt to explain what it means. It's designed to make it easy to add try/finally steps around locking. Each instance of RWLockfile has a count of readers and writers. The file itself has it's own count of readers and writers. When you increment the count, what you're doing is adding to the count of *just* that instance.
+The use of `.add()` and `.remove()` may be a bit misleading but allow me to attempt to explain what it means. It's designed to make it easy to add try/finally steps around locking. Each instance of RWLockfile has a count of readers and writers. The file itself has it's own count of readers and writers. When you increment the count, what you're doing is adding to the count of *just* that instance.
 
 In other words, you can do `lock.add('write')` multiple times on the same instance. That instance will create the write lock if the count is greater than 1 but no other instances will be allowed to increase the count above 0.
 
