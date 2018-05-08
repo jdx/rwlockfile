@@ -85,9 +85,15 @@
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/@heroku/linewrap/-/linewrap-1.0.0.tgz#a9d4e99f0a3e423a899b775f5f3d6747a1ff15c6"
 
-"@types/ansi-styles@^2.0.30":
-  version "2.0.30"
-  resolved "https://registry.yarnpkg.com/@types/ansi-styles/-/ansi-styles-2.0.30.tgz#9a645299020a224afc6a8cd055195850b3c2af85"
+"@types/ansi-styles@^3.2.0":
+  version "3.2.0"
+  resolved "https://registry.yarnpkg.com/@types/ansi-styles/-/ansi-styles-3.2.0.tgz#fc9622eeed20a4d92bc5c28cb3507b748a4c7eba"
+  dependencies:
+    "@types/color-name" "*"
+
+"@types/color-name@*":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@types/color-name/-/color-name-1.1.0.tgz#926f76f7e66f49cc59ad880bb15b030abbf0b66d"
 
 "@types/fs-extra@^5.0.0":
   version "5.0.0"
