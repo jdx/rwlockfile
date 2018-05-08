@@ -11,7 +11,7 @@
   },
   "devDependencies": {
     "@cli-engine/util": "^1.2.12",
-    "@types/ansi-styles": "^2.0.30",
+    "@types/ansi-styles": "^3.2.0",
     "@types/fs-extra": "^5.0.0",
     "@types/jest": "^22.1.2",
     "@types/lodash": "^4.14.104",
