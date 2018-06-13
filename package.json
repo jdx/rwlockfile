@@ -13,7 +13,7 @@
     "@cli-engine/util": "^1.2.12",
     "@types/ansi-styles": "^2.0.30",
     "@types/fs-extra": "^5.0.0",
-    "@types/jest": "^22.1.2",
+    "@types/jest": "^23.1.0",
     "@types/lodash": "^4.14.104",
     "@types/node": "^9.4.6",
     "@types/uuid": "^3.4.3",
