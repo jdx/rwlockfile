@@ -22,7 +22,7 @@
     "jest": "^22.3.0",
     "lodash": "^4.17.5",
     "prettier": "^1.10.2",
-    "ts-jest": "^22.0.4",
+    "ts-jest": "^23.1.0",
     "typescript": "^2.7.2"
   },
   "engines": {
